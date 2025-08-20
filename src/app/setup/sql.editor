@@ -1,0 +1,85 @@
+-- STEP 1: Tạo bảng profiles (phải tạo trước vì có phụ thuộc trong trigger)
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT,
+  full_name TEXT,
+  avatar_url TEXT,
+  role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- STEP 2: Bật RLS cho profiles
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- STEP 3: Tạo policies cho bảng profiles
+CREATE POLICY "Users can view own profile" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Admins can view all profiles" ON profiles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- STEP 4: Hàm xử lý khi tạo người dùng mới trong auth.users
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO profiles (id, email, full_name)
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- STEP 5: Tạo trigger để gắn function handle_new_user vào auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+
+-- STEP 6: Tạo bảng tasks
+CREATE TABLE IF NOT EXISTS tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  due_date DATE NOT NULL,
+  category TEXT NOT NULL,
+  priority TEXT CHECK (priority IN ('low', 'medium', 'high')) NOT NULL DEFAULT 'medium',
+  status TEXT CHECK (status IN ('todo', 'in-progress', 'completed')) NOT NULL DEFAULT 'todo',
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- STEP 7: Tạo index cho bảng tasks
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_category ON tasks(category);
+CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
+
+-- STEP 8: Bật RLS cho tasks
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+
+-- STEP 9: Xoá policy cũ nếu có
+DROP POLICY IF EXISTS "Allow all operations on tasks" ON tasks;
+
+-- STEP 10: Tạo các policy cho tasks
+CREATE POLICY "Users can view own tasks" ON tasks
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own tasks" ON tasks
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own tasks" ON tasks
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own tasks" ON tasks
+  FOR DELETE USING (auth.uid() = user_id);
