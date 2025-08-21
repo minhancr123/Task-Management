@@ -1,5 +1,5 @@
 "use client";
-import { Profile, signIn, signOut, signUp } from "@/lib/auth";
+import { Profile, signIn, signOut, signUp, updateProfile } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { createContext, useEffect, useState } from "react";
@@ -8,9 +8,14 @@ export type AuthContextType = {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signUp: (email: string, password: string, fullname: string) => Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signIn: (email: string, password: string) => Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signOut: () => Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  updateProfile: (profileData: Partial<Profile>) => Promise<any>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -67,7 +72,17 @@ const [user, setUser] = useState<User | null>(null);
     }
   };
 
-  const value = { user, profile, loading, signIn, signUp, signOut };
+  const handleUpdateProfile = async (profileData: Partial<Profile>) => {
+    if (!user) return { error: { message: "User not authenticated" } };
+    
+    const result = await updateProfile(user.id, profileData);
+    if (result.data) {
+      setProfile(result.data);
+    }
+    return result;
+  };
+
+  const value = { user, profile, loading, signIn, signUp, signOut, updateProfile: handleUpdateProfile };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 

@@ -73,7 +73,7 @@ export const LoginForm = ({ onToggleMode }: LoginFormProps) => {
                 </div>
 
                 <div className='text-center text-sm'>
-                  <span className='text-gray-600'>Don't have an account? </span>
+                  <span className='text-gray-600'>Don&apos;t have an account? </span>
                   <Button variant="link" className='p-0 text-blue-600 hover:underline' onClick={() => onToggleMode()}>
                     Sign Up
                   </Button>

@@ -1,200 +1,309 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { createTask } from "@/lib/task";
 import { useState } from "react";
-import {useForm} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import Loading from "../loading";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar, Tag, Flag, CheckSquare } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TaskFormData, taskSchemaValidate } from "../zod/task";
-import { useStore } from "zustand";
+import { taskSchemaValidate } from "../zod/task";
 import { useTaskStore } from "@/store/useTaskStore";
-// interface TaskFormData {
-//         title: string
-//         description: string
-//         due_date: string
-//         category: string
-//         priority: "low" | "medium" | "high"
-//         status: "todo" | "in-progress" | "completed"
-// }
+
 interface CreateTaskDialogProps {
     isOpen: boolean;
-    onOpenChange: (isOpen : boolean) => void;
-    onCreateTask : (task: TaskFormData ) => void
-
-  categories: string[];
+    onOpenChange: (open: boolean) => void;
+    onCreateTask: (task: any) => void;
+    categories: string[];
 }
 
-export function CreateTaskDialog({ isOpen, onOpenChange, onCreateTask, categories }: CreateTaskDialogProps) {
-  const { user } = useAuth();
-     const form = 
-     useForm<TaskFormData>({
-      resolver : zodResolver(taskSchemaValidate),
-    defaultValues: {
-      title: "",
-      description: "",
-      due_date: "",
-      category: "",
-      priority: "medium",
-      status: "todo",
-    },
-  });
-  const { triggerRefresh } = useTaskStore();
-  const [loading ,setloading] = useState(false);
-    const handleCreateTask = async (data: TaskFormData) => {
-  try {
-triggerRefresh();
+export function CreateTaskDialog({
+    isOpen,
+    onOpenChange,
+    onCreateTask,
+    categories,
+}: CreateTaskDialogProps) {
+    const { user } = useAuth();
+    const form = useForm({
+        resolver: zodResolver(taskSchemaValidate),
+        defaultValues: {
+            title: "",
+            description: "",
+            due_date: "",
+            category: "",
+            priority: "medium",
+            status: "todo",
+        },
+    });
 
-    setloading(true);
-    const res = await createTask(data , String(user?.id));
+    const { triggerRefresh } = useTaskStore();
+    const [loading, setLoading] = useState(false);
 
-    if (res) {
-      toast.success("Task created successfully!");
-    } else {
-      toast.error("Failed to create task. Please try again.");
-    }
-  } catch (error : any) {
-    console.error("Error creating task:", error);
-    toast.error(error.message || "Something went wrong");
-  } finally {
-    form.reset();
-    onOpenChange(false);
-    setloading(false);
-  }
-};
+    const handleCreateTask = async (data: any) => {
+        try {
+            setLoading(true);
+            console.log("🚀 CreateTaskDialog: Starting task creation...", data);
+            const res = await createTask(data, String(user?.id));
+            if (res) {
+                console.log("✅ CreateTaskDialog: Task created successfully", res);
+                toast.success("Task created successfully!");
+                onCreateTask(data);
+                form.reset();
+                onOpenChange(false);
+            } else {
+                console.error("❌ CreateTaskDialog: Failed to create task - no result");
+                toast.error("Failed to create task. Please try again.");
+            }
+        } catch (error: any) {
+            console.error("💥 CreateTaskDialog: Error creating task:", error);
+            toast.error(error.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange} >
-        <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-                <DialogTitle className="text-xl font-bold">Create Task</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleCreateTask)} className="space-y-4">
-                    {/* Title */}
-                    <FormField  control={form.control} name="title" render={({field}) => (
-                      <FormItem className="space-y-2" >
-                          <FormLabel>Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter task title" {...field}></Input>
-                          </FormControl>
-                          <FormMessage></FormMessage>
-                      </FormItem>
-                    )}>
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-0 shadow-2xl">
+                {/* Header with gradient */}
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                            <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                <CheckSquare className="h-5 w-5" />
+                            </div>
+                            Create New Task
+                        </DialogTitle>
+                        <p className="text-blue-100 mt-2">
+                            Add a new task to your workflow and stay organized
+                        </p>
+                    </DialogHeader>
+                </div>
 
-                    </FormField>
+                {/* Form Content */}
+                <div className="p-6">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleCreateTask)} className="space-y-6">
+                            {/* Task Title */}
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                            <Tag className="h-4 w-4" />
+                                            Task Title
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Enter a descriptive task title..."
+                                                className="h-11 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                    {/* Description */}
-                    <FormField control={form.control} name="description" render={({field}) => (
-                      <FormItem className="space-y-2">
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter task description" {...field}
-                            value={field.value ?? ""}
-                            ></Input>
-                          </FormControl>
-                          <FormMessage></FormMessage>
-                      </FormItem>
-                    )}>
-                    </FormField>
-                      
-                    <div className="grid sm:grid-cols-2 gap-4 ">
-                      
-                     {/* Due date */}
-                    <FormField control={form.control} name="due_date" render={({field}) => (
-                      <FormItem>
-                          <FormLabel>Due Date</FormLabel>
-                          <FormControl>
-                            <Input type="date" placeholder="Enter task due date" {...field}></Input>
-                          </FormControl>
-                          <FormMessage></FormMessage>
-                      </FormItem>
-                    )}>
-                      
-                    </FormField>
+                            {/* Description */}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                            Description (Optional)
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Add more details about the task..."
+                                                className="h-11 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
+                                                {...field}
+                                                value={field.value ?? ""}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                     {/* Catergory */}
-                    <FormField control={form.control} name="category" render={({field}) => (
-                      <FormItem>
-                          <FormLabel>Catergories</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" >
+                            {/* Grid for Date and Category */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name="due_date"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                <Calendar className="h-4 w-4" />
+                                                Due Date
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="date"
+                                                    className="h-11 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                            </SelectValue>
-                          </SelectTrigger>
+                                <FormField
+                                    control={form.control}
+                                    name="category"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                Category
+                                            </FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger className="h-11 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400">
+                                                        <SelectValue placeholder="Select category" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {categories.map((category) => (
+                                                        <SelectItem key={category} value={category}>
+                                                            {category}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
-                          </FormControl>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                        </Select>
-                        <FormMessage></FormMessage>
-                      </FormItem>
-                    )}>
-                    </FormField>
+                            {/* Grid for Priority and Status */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name="priority"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                <Flag className="h-4 w-4" />
+                                                Priority
+                                            </FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger className="h-11 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400">
+                                                        <SelectValue placeholder="Select priority" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="low">
+                                                        <span className="flex items-center gap-2">
+                                                            <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                                            Low
+                                                        </span>
+                                                    </SelectItem>
+                                                    <SelectItem value="medium">
+                                                        <span className="flex items-center gap-2">
+                                                            <div className="h-2 w-2 bg-yellow-500 rounded-full"></div>
+                                                            Medium
+                                                        </span>
+                                                    </SelectItem>
+                                                    <SelectItem value="high">
+                                                        <span className="flex items-center gap-2">
+                                                            <div className="h-2 w-2 bg-red-500 rounded-full"></div>
+                                                            High
+                                                        </span>
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                    {/* Priority */}
-                    <FormField control={form.control} name="priority" render={({field}) => (
-                      <FormItem>
-                          <FormLabel>Priority</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select priority" >
-                            </SelectValue>
-                          </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="low">Low</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="high">High</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage></FormMessage>
-                      </FormItem>
-                    )}>
-                    </FormField>
-                     {/* Status */}
-                    <FormField control={form.control} name="status" render={({field}) => (
-                      <FormItem>
-                          <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" >
-                            </SelectValue>
-                          </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="todo">To Do</SelectItem>
-                            <SelectItem value="in-progress">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage></FormMessage>
-                      </FormItem>
-                    )}>
-                    </FormField>
+                                <FormField
+                                    control={form.control}
+                                    name="status"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                Status
+                                            </FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger className="h-11 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400">
+                                                        <SelectValue placeholder="Select status" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="todo">To Do</SelectItem>
+                                                    <SelectItem value="in-progress">In Progress</SelectItem>
+                                                    <SelectItem value="completed">Completed</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
-                      </div>  
-                      <Button type="submit" className="w-full" disabled={loading || !form.formState.isValid}>
-                        Create Task
-                      {loading && <Loader2 size={16} className="animate-spin mr-4"></Loader2>}
-                      </Button>
-                </form>
-            </Form>
-        </DialogContent>
-    </Dialog>
-  );
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => onOpenChange(false)}
+                                    className="flex-1 h-11 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg border-0 transition-all duration-200"
+                                    disabled={loading || !form.formState.isValid}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckSquare className="h-4 w-4 mr-2" />
+                                            Create Task
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
 }

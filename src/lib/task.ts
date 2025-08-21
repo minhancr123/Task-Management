@@ -124,10 +124,11 @@ export const fetchTaskById = async (taskId: string): Promise<TaskFormData | null
     }
     return data as TaskFormData;
 }
-export const TaskReview = async () => {
+export const TaskReview = async (userId: string | undefined) => {
   const { data, error } = await supabase
     .from("tasks")
-    .select("status", { count: "exact" });
+    .select("status", { count: "exact" })
+    .eq("user_id", userId);
 
   if (error) throw error;
 
