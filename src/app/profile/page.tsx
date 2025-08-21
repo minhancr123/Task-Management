@@ -123,10 +123,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-2xl">
+    <div className="container mx-auto py-4 sm:py-8 max-w-2xl px-4 sm:px-6">
       {/* Back to Home Button */}
-      <div className="mb-6">
-        <Button variant="outline" onClick={handleBackToHome} className="flex items-center gap-2">
+      <div className="mb-4 sm:mb-6">
+        <Button variant="outline" onClick={handleBackToHome} className="flex items-center gap-2 w-full sm:w-auto">
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Button>
@@ -134,18 +134,18 @@ export default function ProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>My Profile</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl sm:text-2xl">My Profile</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             Manage your personal information and account settings.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           {/* Avatar Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
             <div className="relative">
-              <Avatar className="h-20 w-20 cursor-pointer" onClick={handleAvatarClick}>
+              <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer" onClick={handleAvatarClick}>
                 <AvatarImage src={profile?.avatar_url || ""} />
-                <AvatarFallback className="text-lg">
+                <AvatarFallback className="text-base sm:text-lg">
                   {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
@@ -155,12 +155,12 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" onClick={handleAvatarClick} disabled={avatarLoading}>
+            <div className="space-y-2 text-center sm:text-left">
+              <Button variant="outline" size="sm" onClick={handleAvatarClick} disabled={avatarLoading} className="w-full sm:w-auto">
                 <Camera className="h-4 w-4 mr-2" />
                 {avatarLoading ? "Updating..." : "Change Avatar"}
               </Button>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 JPG, PNG or GIF. Max 2MB.
               </p>
             </div>
@@ -195,7 +195,7 @@ export default function ProfilePage() {
               <Separator />
 
               <div className="flex justify-end">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className="w-full sm:w-auto">
                   {loading ? "Updating..." : "Update Profile"}
                 </Button>
               </div>

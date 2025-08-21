@@ -129,37 +129,37 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-2xl">
+    <div className="container mx-auto py-4 sm:py-8 max-w-2xl px-4 sm:px-6">
       {/* Back to Home Button */}
-      <div className="mb-6">
-        <Button variant="outline" onClick={handleBackToHome} className="flex items-center gap-2">
+      <div className="mb-4 sm:mb-6">
+        <Button variant="outline" onClick={handleBackToHome} className="flex items-center gap-2 w-full sm:w-auto">
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Appearance Settings */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Sun className="h-5 w-5" />
               Appearance
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Customize how the application looks and feels.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Theme</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Theme</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Choose your preferred theme
                 </div>
               </div>
               <Select value={theme} onValueChange={handleThemeChange}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,15 +172,15 @@ export default function SettingsPage() {
 
             <Separator />
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Language</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Language</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Select your preferred language
                 </div>
               </div>
               <Select value={settings.language} onValueChange={handleLanguageChange}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,19 +197,19 @@ export default function SettingsPage() {
         {/* Notification Settings */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Bell className="h-5 w-5" />
               Notifications
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Manage your notification preferences.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Email Notifications</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Email Notifications</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Receive notifications via email
                 </div>
               </div>
@@ -221,10 +221,10 @@ export default function SettingsPage() {
 
             <Separator />
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Push Notifications</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Push Notifications</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Receive push notifications in browser
                 </div>
               </div>
@@ -236,10 +236,10 @@ export default function SettingsPage() {
 
             <Separator />
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Task Reminders</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Task Reminders</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Get reminded about upcoming tasks
                 </div>
               </div>
@@ -269,19 +269,19 @@ export default function SettingsPage() {
         {/* Privacy Settings */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Lock className="h-5 w-5" />
               Privacy
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Control your privacy and data sharing preferences.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Profile Visibility</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Profile Visibility</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Make your profile visible to other users
                 </div>
               </div>
@@ -293,10 +293,10 @@ export default function SettingsPage() {
 
             <Separator />
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Activity Visibility</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Activity Visibility</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Show your activity status to others
                 </div>
               </div>
@@ -311,19 +311,19 @@ export default function SettingsPage() {
         {/* Danger Zone */}
         <Card className="border-destructive">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="flex items-center gap-2 text-destructive text-lg sm:text-xl">
               <Trash2 className="h-5 w-5" />
               Danger Zone
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Irreversible and destructive actions.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
               <div className="space-y-0.5">
-                <Label className="text-base">Delete Account</Label>
-                <div className="text-sm text-muted-foreground">
+                <Label className="text-sm sm:text-base">Delete Account</Label>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Permanently delete your account and all data
                 </div>
               </div>
@@ -331,6 +331,7 @@ export default function SettingsPage() {
                 variant="destructive" 
                 onClick={handleDeleteAccount}
                 disabled={loading}
+                className="w-full sm:w-auto"
               >
                 {loading ? "Deleting..." : "Delete Account"}
               </Button>
