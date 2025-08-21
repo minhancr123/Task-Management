@@ -88,39 +88,7 @@ export default function TaskCard({ task, onUpdate, onDelete, isDragging =false }
                             <h3 className="font-medium text-lg line-clamp-1">
                                 {task.title}
                             </h3>
-                            {/* <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-6 w-6 p-0 cursor-grab"  aria-label="Edit Task">
-                                    <GripVertical className="h-3 w-3 text-slate-400">
-
-                                    </GripVertical>
-                                </Button> */}
-
-                                {/* <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-6 w-6 p-0"
-                                        >
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-
-
-                                    <DropdownMenuContent asChild>
-                                        <DropdownMenuItem onClick={() => setIsEditDialog(true)}>
-                                            Edit
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            onDelete(task.id as string);
-                                        }} className="text-red-600 dark:text-red-400">
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu> */}
-                            {/* </div> */}
+                          
                         </div>
 
                         <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">

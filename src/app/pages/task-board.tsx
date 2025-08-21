@@ -386,44 +386,53 @@ export default function TaskBoard() {
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setDraggedTask(null);
+ const handleDragEnd = async (event: DragEndEvent) => {
+  const { active, over } = event;
+  setDraggedTask(null);
 
-    if (!over || !active.id) return;
+  if (!over || !active.id) return;
 
-    const taskId = active.id as string;
-    const newStatus = over.id as Status;
-    
-    // Check if it's a valid status
-    if (!["todo", "in-progress", "completed"].includes(newStatus)) {
+  const taskId = active.id as string;
+
+  let newStatus: Status | null = null;
+
+  // Nếu thả vào column
+  if (["todo", "in-progress", "completed"].includes(over.id as string)) {
+    newStatus = over.id as Status;
+  } 
+  // Nếu thả vào 1 task khác thì lấy column của task đó
+  else {
+    const overTask = tasks.find((t) => t.id === over.id);
+    if (overTask) newStatus = overTask.status as Status;
+  }
+
+  if (!newStatus) return;
+
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task || task.status === newStatus) return;
+
+  console.log(`Moving task ${taskId} from ${task.status} to ${newStatus}`);
+
+  try {
+    setIsUpdating(true);
+    const result = await editTask(taskId, { status: newStatus });
+
+    if (typeof result === "string") {
+      toast.error(result);
       return;
     }
-    
-    const task = tasks.find(t => t.id === taskId);
-    if (!task || task.status === newStatus) return;
 
-    console.log(`Moving task ${taskId} from ${task.status} to ${newStatus}`);
+    toast.success(`Task moved to ${newStatus.replace("-", " ")}`);
+    triggerRefresh();
+    await refreshTasks();
+  } catch (error) {
+    console.error("Error updating task:", error);
+    toast.error("Failed to update task");
+  } finally {
+    setIsUpdating(false);
+  }
+};
 
-    try {
-      setIsUpdating(true);
-      const result = await editTask(taskId, { status: newStatus });
-      
-      if (typeof result === "string") {
-        toast.error(result);
-        return;
-      }
-
-      toast.success(`Task moved to ${newStatus.replace('-', ' ')}`);
-      triggerRefresh();
-      await refreshTasks();
-    } catch (error) {
-      console.error("Error updating task:", error);
-      toast.error("Failed to update task");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   const handleDeleteTask = async (taskId: string) => {
     try {
