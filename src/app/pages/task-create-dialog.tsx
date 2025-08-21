@@ -30,20 +30,18 @@ import { toast } from "sonner";
 import { Loader2, Calendar, Tag, Flag, CheckSquare } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { taskSchemaValidate } from "../zod/task";
+import { taskSchemaValidate, TaskFormData } from "../zod/task";
 import { useTaskStore } from "@/store/useTaskStore";
 
 interface CreateTaskDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onCreateTask: (task: any) => void;
     categories: string[];
 }
 
 export function CreateTaskDialog({
     isOpen,
     onOpenChange,
-    onCreateTask,
     categories,
 }: CreateTaskDialogProps) {
     const { user } = useAuth();
@@ -62,7 +60,7 @@ export function CreateTaskDialog({
     const { triggerRefresh } = useTaskStore();
     const [loading, setLoading] = useState(false);
 
-    const handleCreateTask = async (data: any) => {
+    const handleCreateTask = async (data: TaskFormData) => {
         try {
             setLoading(true);
             console.log("🚀 CreateTaskDialog: Starting task creation...", data);
@@ -70,16 +68,16 @@ export function CreateTaskDialog({
             if (res) {
                 console.log("✅ CreateTaskDialog: Task created successfully", res);
                 toast.success("Task created successfully!");
-                onCreateTask(data);
                 form.reset();
                 onOpenChange(false);
             } else {
                 console.error("❌ CreateTaskDialog: Failed to create task - no result");
                 toast.error("Failed to create task. Please try again.");
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("💥 CreateTaskDialog: Error creating task:", error);
-            toast.error(error.message || "Something went wrong");
+            const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

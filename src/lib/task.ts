@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "./supabase"
 import { TaskFormData } from "@/app/zod/task";
 export interface Task {
@@ -62,7 +61,7 @@ export const editTask = async (taskId: string, updates: Partial<TaskFormData>): 
                 acc[key] = value;
             }
             return acc;
-        }, {} as Record<string, any>);
+        }, {} as Record<string, unknown>);
 
         console.log("Clean updates:", cleanUpdates);
 
@@ -102,9 +101,10 @@ export const deleteTask = async (taskId: string): Promise<Task | string> => {
         console.log("Task deleted successfully:", data);
         return data;
     }
-    catch(error : any) {
+    catch(error : unknown) {
         console.error("Error deleting task:", error);
-        throw new Error(error.message || "Failed to delete task");
+        const errorMessage = error instanceof Error ? error.message : "Failed to delete task";
+        throw new Error(errorMessage);
     }
     {
       

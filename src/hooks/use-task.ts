@@ -2,7 +2,6 @@ import { supabase } from "@/lib/supabase"
 import { useAuth } from "./use-auth"
 import { useEffect, useState, useCallback } from "react";
 import { TaskFormData } from "@/app/zod/task";
-import { Task } from "@/lib/task";
 
 export const useTask = () => {
     const [tasks , setTasks] =useState<TaskFormData[]>([]);
