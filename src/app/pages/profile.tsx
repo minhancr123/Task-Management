@@ -121,22 +121,22 @@ export default function Profile() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
         {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)} variant="outline">
+          <Button onClick={() => setIsEditing(true)} variant="outline" className="w-full sm:w-auto">
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
         ) : (
-          <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={loading}>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto">
               <Save className="h-4 w-4 mr-2" />
               {loading ? "Saving..." : "Save"}
             </Button>
-            <Button onClick={handleCancel} variant="outline">
+            <Button onClick={handleCancel} variant="outline" className="w-full sm:w-auto">
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
@@ -157,16 +157,16 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Avatar Section */}
-              <div className="flex items-center gap-6">
-                <Avatar className="h-24 w-24 ring-4 ring-blue-100 dark:ring-blue-900 shadow-xl">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+                <Avatar className="h-20 w-20 sm:h-24 sm:w-24 ring-4 ring-blue-100 dark:ring-blue-900 shadow-xl">
                   <AvatarImage src={profileData.avatar_url} alt="Profile avatar" />
-                  <AvatarFallback className="text-2xl font-bold">
+                  <AvatarFallback className="text-xl sm:text-2xl font-bold">
                     {profileData.full_name ? getInitials(profileData.full_name) : "U"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <h3 className="text-xl font-semibold">{profileData.full_name || "User"}</h3>
-                  <p className="text-gray-500">{profileData.email}</p>
+                <div className="text-center sm:text-left">
+                  <h3 className="text-lg sm:text-xl font-semibold">{profileData.full_name || "User"}</h3>
+                  <p className="text-gray-500 text-sm sm:text-base">{profileData.email}</p>
                   <Badge variant="secondary" className="mt-1">
                     {profile?.role || "User"}
                   </Badge>

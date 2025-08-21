@@ -144,10 +144,10 @@ function SortableTask({
     `}
   />
 
-  <CardContent className="p-4">
-    <div className="space-y-3">
+  <CardContent className="p-3 sm:p-4">
+    <div className="space-y-2 sm:space-y-3">
       {/* Task Header */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
         <h3 className="font-semibold text-sm leading-tight text-gray-900 dark:text-gray-100 flex-1 line-clamp-2">
           {task.title}
         </h3>

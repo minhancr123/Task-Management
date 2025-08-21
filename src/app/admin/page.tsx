@@ -292,30 +292,30 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-4 sm:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="outline" onClick={handleBackToHome} className="flex items-center gap-2">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+          <Button variant="outline" onClick={handleBackToHome} className="flex items-center gap-2 w-full sm:w-auto">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Shield className="h-8 w-8" />
+          <div className="text-center sm:text-right">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 justify-center sm:justify-end">
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8" />
               Admin Dashboard
             </h1>
-            <p className="text-muted-foreground">Manage users and tasks</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Manage users and tasks</p>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4 sm:mb-6">
         <Button
           variant={activeTab === "overview" ? "default" : "outline"}
           onClick={() => handleTabChange("overview")}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <BarChart3 className="h-4 w-4" />
           Overview
@@ -323,7 +323,7 @@ export default function AdminPage() {
         <Button
           variant={activeTab === "users" ? "default" : "outline"}
           onClick={() => handleTabChange("users")}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <Users className="h-4 w-4" />
           Users
@@ -331,7 +331,7 @@ export default function AdminPage() {
         <Button
           variant={activeTab === "tasks" ? "default" : "outline"}
           onClick={() => handleTabChange("tasks")}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <CheckCircle className="h-4 w-4" />
           Tasks
@@ -340,7 +340,7 @@ export default function AdminPage() {
 
       {/* Content */}
       {activeTab === "overview" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>

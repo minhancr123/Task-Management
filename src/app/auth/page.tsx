@@ -57,36 +57,36 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8 min-h-screen items-center">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 min-h-screen items-center">
           
           {/* Left Side - Welcome & Features */}
-          <div className="space-y-8 lg:pr-8">
+          <div className="space-y-4 sm:space-y-8 lg:pr-8 order-2 lg:order-1">
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
-                <Zap className="h-4 w-4 mr-2" />
+              <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Welcome to TaskFlow
               </div>
               
-              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              <h1 className="text-2xl sm:text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                 Manage Your
                 <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Tasks Efficiently
                 </span>
               </h1>
               
-              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">
+              <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-2xl">
                 Streamline your workflow, boost productivity, and achieve your goals with our modern task management platform.
               </p>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {features.map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50">
+                  <div key={index} className="flex items-start space-x-3 p-3 sm:p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50">
                     <div className="flex-shrink-0 mt-1">
                       {feature.icon}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm">
                         {feature.title}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
@@ -100,9 +100,9 @@ export default function AuthPage() {
           </div>
 
           {/* Right Side - Auth Forms */}
-          <div className="flex justify-center lg:justify-end">
+          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
             <Card className="w-full max-w-md bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 shadow-2xl">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 {/* Mode Toggle */}
                 <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1 mb-8">
                   <Button
@@ -128,11 +128,11 @@ export default function AuthPage() {
                 </div>
 
                 {/* Welcome Text */}
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="text-center mb-6 sm:mb-8">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     {isLoginMode ? "Welcome Back!" : "Create Account"}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                     {isLoginMode 
                       ? "Sign in to continue to TaskFlow" 
                       : "Join TaskFlow and boost your productivity"
@@ -148,8 +148,8 @@ export default function AuthPage() {
                 )}
 
                 {/* Footer */}
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">
-                  <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-slate-700">
+                  <p className="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                     By continuing, you agree to our{" "}
                     <a href="#" className="text-blue-600 hover:underline">Terms of Service</a>
                     {" "}and{" "}
