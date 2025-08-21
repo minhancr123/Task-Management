@@ -375,22 +375,22 @@ export default function AdminPage() {
       {activeTab === "users" && (
         <Card>
           <CardHeader>
-            <CardTitle>User Management</CardTitle>
-            <CardDescription>Manage user accounts and permissions</CardDescription>
+            <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Manage user accounts and permissions</CardDescription>
           </CardHeader>
           <CardContent>
             {!usersLoaded ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                  <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg gap-4 sm:gap-0">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded-full animate-pulse"></div>
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded-full animate-pulse"></div>
                       <div className="space-y-2">
                         <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-32 animate-pulse"></div>
                         <div className="h-3 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-48 animate-pulse"></div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                       <div className="h-6 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded-full w-16 animate-pulse"></div>
                       <div className="h-8 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-20 animate-pulse"></div>
                     </div>
@@ -400,19 +400,19 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-4">
                 {users.map((userData) => (
-                <div key={userData.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={userData.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4 sm:gap-0">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback className="text-lg font-bold">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                      <AvatarFallback className="text-base sm:text-lg font-bold">
                         {userData.full_name?.charAt(0)?.toUpperCase() || userData.email?.charAt(0)?.toUpperCase() || "?"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium">{userData.full_name || "No name"}</div>
-                      <div className="text-sm text-muted-foreground">{userData.email}</div>
+                      <div className="font-medium text-sm sm:text-base">{userData.full_name || "No name"}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">{userData.email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Badge variant={userData.role === "admin" ? "default" : "secondary"}>
                       {userData.role || "user"}
                     </Badge>
@@ -421,7 +421,7 @@ export default function AdminPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => handlePromoteUser(userData.id)}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 text-xs sm:text-sm"
                       >
                         <UserCheck className="h-3 w-3" />
                         Promote
@@ -431,13 +431,13 @@ export default function AdminPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDemoteUser(userData.id)}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 text-xs sm:text-sm"
                       >
                         <UserX className="h-3 w-3" />
                         Demote
                       </Button>
                     ) : (
-                      <Badge variant="outline">Current User</Badge>
+                      <Badge variant="outline" className="text-xs">Current User</Badge>
                     )}
                   </div>
                 </div>
@@ -452,16 +452,17 @@ export default function AdminPage() {
       {activeTab === "tasks" && (
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
               <div>
-                <CardTitle>Recent Tasks</CardTitle>
-                <CardDescription>Monitor and manage all tasks in the system</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Recent Tasks</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Monitor and manage all tasks in the system</CardDescription>
               </div>
               <Button
                 onClick={refreshData}
                 variant="outline"
                 size="sm"
                 disabled={loading}
+                className="w-full sm:w-auto"
               >
                 {loading ? "Refreshing..." : "Refresh"}
               </Button>
@@ -471,19 +472,19 @@ export default function AdminPage() {
             {!tasksLoaded ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                    <div className="flex-1 space-y-2">
-                      <div className="h-5 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-48 animate-pulse"></div>
-                      <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-64 animate-pulse"></div>
+                  <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg gap-4 sm:gap-0">
+                    <div className="flex-1 space-y-2 w-full">
+                      <div className="h-4 sm:h-5 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-full sm:w-48 animate-pulse"></div>
+                      <div className="h-3 sm:h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-full sm:w-64 animate-pulse"></div>
                       <div className="flex gap-2 mt-2">
                         <div className="h-5 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded-full w-16 animate-pulse"></div>
                         <div className="h-5 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded-full w-20 animate-pulse"></div>
                         <div className="h-5 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded-full w-14 animate-pulse"></div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-24 animate-pulse"></div>
-                      <div className="h-8 bg-gradient-to-r from-red-200 to-red-300 dark:from-red-800 dark:to-red-700 rounded w-8 animate-pulse"></div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                      <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-500 rounded w-20 sm:w-24 animate-pulse"></div>
+                      <div className="h-8 bg-gradient-to-r from-red-200 to-red-300 dark:from-red-800 dark:to-red-700 rounded w-16 sm:w-8 animate-pulse"></div>
                     </div>
                   </div>
                 ))}
@@ -492,34 +493,34 @@ export default function AdminPage() {
             <div className="space-y-4">
               {tasks.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No tasks found</p>
+                  <p className="text-muted-foreground text-sm sm:text-base">No tasks found</p>
                 </div>
               ) : (
                 tasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium">{task.title}</div>
-                      <div className="text-sm text-muted-foreground">
+                  <div key={task.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4 sm:gap-0">
+                    <div className="flex-1 w-full">
+                      <div className="font-medium text-sm sm:text-base">{task.title}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         by {task.profiles?.full_name || task.profiles?.email || "Unknown"}
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant={task.status === "completed" ? "default" : "secondary"}>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant={task.status === "completed" ? "default" : "secondary"} className="text-xs">
                           {task.status}
                         </Badge>
-                        <Badge variant={task.priority === "high" ? "destructive" : "outline"}>
+                        <Badge variant={task.priority === "high" ? "destructive" : "outline"} className="text-xs">
                           {task.priority}
                         </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         {new Date(task.created_at).toLocaleDateString()}
                       </div>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleDeleteTask(task.id)}
-                        className="flex items-center gap-1 text-destructive hover:text-destructive"
+                        className="flex items-center gap-1 text-destructive hover:text-destructive text-xs sm:text-sm w-full sm:w-auto"
                       >
                         <Trash2 className="h-3 w-3" />
                         Delete
