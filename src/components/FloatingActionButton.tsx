@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Calendar, Flag, Target, X } from "lucide-react";
-import { CreateTaskDialog } from "../pages/task-create-dialog";
+import { CreateTaskDialog } from "@/app/pages/task-create-dialog";
 
 export default function FloatingActionButton() {
   const [isOpen, setIsOpen] = useState(false);

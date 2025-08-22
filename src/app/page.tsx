@@ -2,8 +2,9 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Header } from "./layout/Header";
 import TaskManagement from "./pages/task-management";
-import FloatingActionButton from "./components/FloatingActionButton";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import GloBalPresence from "@/context/GloBalPresence";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 export default function Home() {
   return (

@@ -18,6 +18,18 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Font optimization and error handling
+  optimizeFonts: true,
+  fontLoaders: [
+    {
+      loader: '@next/font/google',
+      options: {
+        subsets: ['latin'],
+        display: 'swap',
+        fallback: ['system-ui', 'arial'],
+      },
+    },
+  ],
 }
 
 module.exports = nextConfig

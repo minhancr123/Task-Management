@@ -1,10 +1,24 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
-import { getFontVariables } from "@/utils/fonts";
-import GlobalPresence from "@/context/GloBalPresence";
+
+// Alternative fonts that are more reliable
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Arial", "sans-serif"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  fallback: ["ui-monospace", "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", "monospace"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Task Management System",
@@ -62,13 +76,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${getFontVariables()} antialiased`}
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <ThemeProvider>
           <AuthProvider>
-            <GlobalPresence>
               {children}
-            </GlobalPresence>
           </AuthProvider>
         </ThemeProvider>
         <Toaster />

@@ -9,6 +9,8 @@ import { useTaskStore } from "@/store/useTaskStore";
 import { useTask } from "@/hooks/use-task";
 import { usePageRefresh } from "@/hooks/use-page-refresh";
 import TaskBoard from "./task-board";
+import { PresenceUser } from "@/context/GloBalPresence";
+import OnlineUsers from "@/components/online-users";
 
 const INITIAL_TASK_LIST = {
     total: 0,
@@ -62,7 +64,7 @@ export default function TaskManagement() {
     const { user } = useAuth();
     const { tasks, refreshTasks, isLoading: tasksLoading } = useTask();
     const { refreshKey } = useTaskStore();
-    
+    const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
     // Enable page refresh detection
     usePageRefresh();
 
@@ -88,25 +90,16 @@ export default function TaskManagement() {
     useEffect(() => {
         if (user?.id) {
             setLoading(false);
-            console.log("🏠 TaskManagement: Component mounted, refreshing tasks");
-            refreshTasks();
+            console.log("🏠 TaskManagement: User available, tasks will load from useTask hook");
         } else {
             setLoading(true);
         }
-    }, [user?.id, refreshTasks]);
+    }, [user?.id]);
 
-    // Force refresh when component mounts (every time user navigates to this page)
-    useEffect(() => {
-        if (user?.id) {
-            console.log("🔄 TaskManagement: Force refresh on mount");
-            refreshTasks();
-        }
-    }, []);
-
-    // Handle refresh trigger from store only (visibility/focus handled in use-task.ts)
+    // Handle refresh trigger from store only (after CRUD operations) 
     useEffect(() => {
         if (refreshKey > 0 && user?.id) {
-            console.log("🔄 TaskManagement: Refresh triggered from store");
+            console.log("🔄 TaskManagement: Store triggered refresh");
             refreshTasks();
         }
     }, [refreshKey, user?.id, refreshTasks]);
@@ -393,6 +386,9 @@ export default function TaskManagement() {
                     </div>
                 </div>
             </div>
+            
+            {/* Online Users Component */}
+            <OnlineUsers />
         </div>
     );
 }

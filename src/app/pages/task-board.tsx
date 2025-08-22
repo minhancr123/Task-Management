@@ -315,29 +315,13 @@ export default function TaskBoard() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  // Auto-refresh when refresh is triggered
+  // Only refresh when store triggers it (after CRUD operations)
   useEffect(() => {
     if (refreshKey > 0) {
-      console.log("🔄 TaskBoard: Auto-refreshing due to trigger");
+      console.log("🔄 TaskBoard: Store triggered refresh");
       refreshTasks();
     }
   }, [refreshKey, refreshTasks]);
-
-  // Force refresh when component mounts
-  useEffect(() => {
-    if (user?.id) {
-      console.log("� TaskBoard: Component mounted with user, forcing refresh");
-      refreshTasks();
-    }
-  }, [user?.id, refreshTasks]);
-
-  // Additional refresh on every mount (navigation)
-  useEffect(() => {
-    console.log("📋 TaskBoard: Component mounted, refreshing tasks");
-    if (user?.id) {
-      refreshTasks();
-    }
-  }, []);
 
   // Configure sensors for better drag behavior
   const mouseSensor = useSensor(MouseSensor, {
@@ -393,17 +377,18 @@ export default function TaskBoard() {
   if (!over || !active.id) return;
 
   const taskId = active.id as string;
-
   let newStatus: Status | null = null;
 
-  // Nếu thả vào column
+  // TH1: Thả trực tiếp vào column
   if (["todo", "in-progress", "completed"].includes(over.id as string)) {
     newStatus = over.id as Status;
   } 
-  // Nếu thả vào 1 task khác thì lấy column của task đó
+  // TH2: Thả vào 1 task khác trong column
   else {
     const overTask = tasks.find((t) => t.id === over.id);
-    if (overTask) newStatus = overTask.status as Status;
+    if (overTask) {
+      newStatus = overTask.status as Status;
+    }
   }
 
   if (!newStatus) return;
@@ -411,7 +396,7 @@ export default function TaskBoard() {
   const task = tasks.find((t) => t.id === taskId);
   if (!task || task.status === newStatus) return;
 
-  console.log(`Moving task ${taskId} from ${task.status} to ${newStatus}`);
+  console.log(`✅ Moving task ${taskId} from ${task.status} to ${newStatus}`);
 
   try {
     setIsUpdating(true);
@@ -423,8 +408,7 @@ export default function TaskBoard() {
     }
 
     toast.success(`Task moved to ${newStatus.replace("-", " ")}`);
-    triggerRefresh();
-    await refreshTasks();
+    triggerRefresh(); // Trigger refresh for all components
   } catch (error) {
     console.error("Error updating task:", error);
     toast.error("Failed to update task");
@@ -434,13 +418,13 @@ export default function TaskBoard() {
 };
 
 
+
   const handleDeleteTask = async (taskId: string) => {
     try {
       setIsUpdating(true);
       await deleteTaskFromLib(taskId);
       toast.success("Task deleted successfully");
-      triggerRefresh();
-      await refreshTasks();
+      triggerRefresh(); // Trigger refresh for all components
     } catch (error) {
       console.error("Error deleting task:", error);
       toast.error("Failed to delete task");
@@ -470,71 +454,56 @@ export default function TaskBoard() {
         </div>
       </div>
 
-      <DndContext 
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-full">
-          {COLUMNS.map((column) => (
-            <DroppableColumn
-              key={column.id}
-              column={column}
-              tasks={tasksByStatus[column.status]}
-              onDeleteTask={handleDeleteTask}
-              onEditTask={handleEditTask}
-              isUpdating={isUpdating}
-            />
-          ))}
-        </div>
+     <DndContext
+  sensors={sensors}
+  collisionDetection={closestCorners}
+  onDragStart={handleDragStart}
+  onDragEnd={handleDragEnd}
+>
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-full">
+    {COLUMNS.map((column) => (
+      <DroppableColumn
+        key={column.id}
+        column={column}
+        tasks={tasksByStatus[column.status]}
+        onDeleteTask={handleDeleteTask}
+        onEditTask={handleEditTask}
+        isUpdating={isUpdating}
+      />
+    ))}
+  </div>
 
-        <DragOverlay 
-          dropAnimation={null}
-          style={{ cursor: 'grabbing' }}
-          modifiers={[snapCenterToCursor]}
-        >
-          {draggedTask && (
-            <div 
-              className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-lg border-2 border-blue-500 opacity-90"
-              style={{ 
-                transform: 'rotate(5deg)',
-                cursor: 'grabbing'
-              }}
-            >
-              <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">{draggedTask.title}</h3>
-              <div className="flex items-center gap-2 mt-2">
-                <Badge className="text-xs">{draggedTask.priority}</Badge>
-                {draggedTask.category && (
-                  <Badge variant="outline" className="text-xs">{draggedTask.category}</Badge>
-                )}
-              </div>
-            </div>
+  <DragOverlay
+    dropAnimation={null}
+    style={{ cursor: "grabbing" }}
+    modifiers={[snapCenterToCursor]}
+  >
+    {draggedTask && (
+      <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-lg border-2 border-blue-500 opacity-90"
+        style={{ transform: "rotate(5deg)", cursor: "grabbing" }}
+      >
+        <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+          {draggedTask.title}
+        </h3>
+        <div className="flex items-center gap-2 mt-2">
+          <Badge className="text-xs">{draggedTask.priority}</Badge>
+          {draggedTask.category && (
+            <Badge variant="outline" className="text-xs">
+              {draggedTask.category}
+            </Badge>
           )}
-        </DragOverlay>
-      </DndContext>
+        </div>
+      </div>
+    )}
+  </DragOverlay>
+</DndContext>
+
 
       {/* Create Task Dialog */}
       {isCreateDialogOpen && (
         <CreateTaskDialog
           isOpen={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
-          onCreateTask={async (task: Omit<TaskItem, "id">) => {
-            if (!user?.id) {
-              toast.error("User not authenticated");
-              return;
-            }
-            const result = await createTask(task, user.id);
-            if (typeof result === "string") {
-              toast.error(result);
-              throw new Error(result);
-            }
-            toast.success("Task created successfully");
-            setIsCreateDialogOpen(false);
-            triggerRefresh();
-            await refreshTasks();
-            return result;
-          }}
           categories={["Work", "Personal", "Shopping", "Health", "Other"]}
         />
       )}
@@ -545,17 +514,14 @@ export default function TaskBoard() {
           task={editingTask}
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
-          onUpdateTask={async (taskId: string, updates: any) => {
+          onUpdateTask={async (taskId: string, updates: Partial<TaskFormData>) => {
             const result = await editTask(taskId, updates);
             if (typeof result === "string") {
               toast.error(result);
               throw new Error(result);
             }
             toast.success("Task updated successfully");
-            setIsEditDialogOpen(false);
-            setEditingTask(null);
-            triggerRefresh();
-            await refreshTasks();
+            triggerRefresh(); // Trigger refresh for all components
             return result;
           }}
         />

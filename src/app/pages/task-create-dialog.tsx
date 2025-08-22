@@ -69,6 +69,7 @@ export function CreateTaskDialog({
                 console.log("✅ CreateTaskDialog: Task created successfully", res);
                 toast.success("Task created successfully!");
                 form.reset();
+                triggerRefresh(); // Trigger refresh for all components
                 onOpenChange(false);
             } else {
                 console.error("❌ CreateTaskDialog: Failed to create task - no result");

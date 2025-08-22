@@ -6,7 +6,8 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CatergoryMock, Task } from "@/lib/task";
+import { useTaskStore } from "@/store/useTaskStore";
+import { editTask } from "@/lib/task";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
@@ -16,7 +17,7 @@ interface TaskEditDialogProps {
     task: TaskFormData;
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onUpdateTask: (taskId: string, updates: Partial<TaskFormData>) => Promise<Task | string>;
+    onUpdateTask: (taskId: string, updates: Partial<TaskFormData>) => Promise<TaskFormData | string>;
 }
 
 export default function EditTaskDialog({ 
@@ -26,6 +27,7 @@ export default function EditTaskDialog({
     onUpdateTask 
 }: TaskEditDialogProps) {
     const [loading, setLoading] = useState(false);
+    const { triggerRefresh } = useTaskStore();
     
     const formEdit = useForm<TaskFormData>({
         resolver: zodResolver(taskSchemaValidate),
@@ -68,6 +70,7 @@ export default function EditTaskDialog({
             
             if (result) {
                 toast.success("Task updated successfully!");
+                triggerRefresh(); // Trigger refresh for all components
                 onOpenChange(false);
                 // Reset form với dữ liệu mới
                 formEdit.reset(data);
@@ -174,9 +177,9 @@ export default function EditTaskDialog({
                                             <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {CatergoryMock.map((cat) => (
-                                                <SelectItem key={cat.id} value={cat.name}>
-                                                    {cat.name}
+                                            {["Work", "Personal", "Shopping", "Health", "Other"].map((cat) => (
+                                                <SelectItem key={cat} value={cat}>
+                                                    {cat}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

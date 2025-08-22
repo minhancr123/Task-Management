@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { CreateTaskDialog } from "../pages/task-create-dialog";
 import { CatergoryMock } from "@/lib/task";
 import { useTaskStore } from "@/store/useTaskStore";
-import { NotificationDropdown } from "../components/NotificationDropdown";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 
 export function Header() {
     const { user, profile, signOut, loading } = useAuth();

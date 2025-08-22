@@ -157,11 +157,17 @@ export default function AdminPage() {
 
       if (error) throw error;
       
+      // Optimistic update - update local state immediately
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, role: "admin" } : user
+      ));
+      
       toast.success("User promoted to admin");
-      refreshData(); // Use refreshData instead of fetchAdminData
     } catch (error) {
       console.error("Error promoting user:", error);
       toast.error("Failed to promote user");
+      // Re-fetch users on error
+      fetchUsers();
     }
   };
 
@@ -174,11 +180,17 @@ export default function AdminPage() {
 
       if (error) throw error;
       
+      // Optimistic update - update local state immediately
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, role: "user" } : user
+      ));
+      
       toast.success("User demoted to regular user");
-      refreshData(); // Use refreshData instead of fetchAdminData
     } catch (error) {
       console.error("Error demoting user:", error);
       toast.error("Failed to demote user");
+      // Re-fetch users on error
+      fetchUsers();
     }
   };
 
@@ -191,11 +203,22 @@ export default function AdminPage() {
 
       if (error) throw error;
       
+      // Optimistic update - remove from local state immediately
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      
+      // Update stats optimistically
+      setStats((prev: any) => prev ? {
+        ...prev,
+        totalTasks: prev.totalTasks - 1,
+        // Note: Can't easily update completedTasks without knowing task status
+      } : prev);
+      
       toast.success("Task deleted");
-      refreshData(); // Use refreshData instead of fetchAdminData
     } catch (error) {
       console.error("Error deleting task:", error);
       toast.error("Failed to delete task");
+      // Re-fetch tasks on error
+      fetchTasks();
     }
   };
 
