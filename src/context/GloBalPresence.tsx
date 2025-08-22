@@ -19,11 +19,8 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
 
   useEffect(() => {
     if (!user?.id) {
-      console.log("GlobalPresence: No user ID available");
       return;
     }
-
-    console.log("GlobalPresence: Setting up presence for user:", user.id);
 
     const channel = supabase.channel("global-presence", {
       config: {
@@ -34,32 +31,41 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
     // Khi có sync -> cập nhật danh sách online
     channel.on("presence", { event: "sync" }, () => {
       const state = channel.presenceState();
-      console.log("GlobalPresence: Presence state updated:", state);
-      const users: PresenceUser[] = Object.values(state)
-        .flat()
-        .map((item: any) => ({
-          id: item.key,
-          username: item.username,
-        }));
-      console.log("GlobalPresence: Online users:", users);
+      
+      // Tạo Set để tránh duplicate users
+      const uniqueUsers = new Map<string, PresenceUser>();
+      
+      Object.keys(state).forEach((key) => {
+        const presences = state[key];
+        if (presences && presences.length > 0) {
+          const presence = presences[0] as any;
+          
+          // Sử dụng user_id từ presence data thay vì key
+          const userId = presence.user_id || key;
+          uniqueUsers.set(userId, {
+            id: userId,
+            username: presence.username,
+          });
+        }
+      });
+      
+      const users = Array.from(uniqueUsers.values());
       setOnlineUsers(users);
     });
 
     // Đăng ký & báo user này đang online
     channel.subscribe(async (status) => {
-      console.log("GlobalPresence: Channel status:", status);
       if (status === "SUBSCRIBED") {
         const username = user.user_metadata?.username || user.email || "Anonymous";
-        console.log("GlobalPresence: Tracking user:", username);
         await channel.track({
           username: username,
+          user_id: user.id,
         });
       }
     });
 
     // cleanup khi unmount
     return () => {
-      console.log("GlobalPresence: Unsubscribing channel");
       channel.unsubscribe();
     };
   }, [user?.id]);

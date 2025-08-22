@@ -9,7 +9,7 @@ import {
 } from '@/hooks/use-realtime-chat'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Send } from 'lucide-react'
+import { Send, MessageCircle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
 interface CompactChatProps {
@@ -51,26 +51,32 @@ export const CompactChat = ({
   return (
     <div className="flex flex-col h-full w-full">
       {/* Connection status */}
-      <div className="px-3 py-2 bg-gradient-to-r from-muted/50 to-muted/30 text-xs text-center border-b border-border/50">
+      <div className="px-4 py-2 bg-gradient-to-r from-muted/30 to-muted/10 text-xs text-center border-b border-border/30">
         <span className={cn(
           "inline-block w-2 h-2 rounded-full mr-2 transition-colors",
           isConnected ? "bg-green-500" : "bg-red-500"
         )} />
-        {isConnected ? "Connected" : "Connecting..."}
+        <span className="text-muted-foreground">
+          {isConnected ? "Connected" : "Connecting..."}
+        </span>
       </div>
 
       {/* Messages */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0 bg-gradient-to-b from-background to-muted/10"
+        className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-gradient-to-b from-background/50 to-muted/5"
       >
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-3">
-              <Send className="h-8 w-8 text-blue-500 dark:text-blue-400" />
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 rounded-full flex items-center justify-center mb-4">
+              <MessageCircle className="h-8 w-8 text-blue-500 dark:text-blue-400" />
             </div>
-            <p className="text-xs text-muted-foreground font-medium">Start chatting!</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Send your first message</p>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+              Start a conversation
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Send your first message to get started
+            </p>
           </div>
         )}
         {messages.map((message, index) => {
@@ -95,10 +101,10 @@ export const CompactChat = ({
       {/* Input */}
       <form
         onSubmit={handleSendMessage}
-        className="flex gap-2 border-t border-border p-3 bg-gradient-to-r from-background to-muted/10"
+        className="flex gap-2 border-t border-border/50 p-4 bg-gradient-to-r from-background/80 to-muted/10"
       >
         <Input
-          className="text-sm flex-1 border-muted-foreground/20 focus:border-blue-500 transition-colors"
+          className="text-sm flex-1 border-muted-foreground/20 focus:border-blue-500 transition-colors rounded-xl"
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
@@ -110,10 +116,10 @@ export const CompactChat = ({
           size="sm"
           disabled={!isConnected || !newMessage.trim()}
           className={cn(
-            "px-3 transition-all duration-200",
+            "h-9 w-9 p-0 rounded-xl transition-all duration-200",
             !isConnected || !newMessage.trim() 
               ? "bg-muted text-muted-foreground" 
-              : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105"
+              : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 shadow-lg"
           )}
         >
           <Send className="h-4 w-4" />
