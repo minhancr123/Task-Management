@@ -3,10 +3,10 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { AlarmClockCheck, Laugh, ListChecks, Loader2, Tag, TrendingUp, Calendar, CheckCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTaskStore } from "@/store/useTaskStore";
-import { useTask } from "@/hooks/use-task";
+import { useOptimizedTasks } from "@/hooks/use-optimized-tasks";
 import { usePageRefresh } from "@/hooks/use-page-refresh";
 import TaskBoard from "./task-board";
 import { PresenceUser } from "@/context/GloBalPresence";
@@ -58,33 +58,69 @@ const STAT_CARDS = [
     },
 ];
 
+// Memoized StatCard component to prevent unnecessary re-renders
+const StatCard = memo(({ 
+  stat, 
+  value, 
+  isLoading 
+}: { 
+  stat: typeof STAT_CARDS[0]; 
+  value: number; 
+  isLoading: boolean;
+}) => (
+  <Card className={`${stat.bgColor} border-0 shadow-xl rounded-2xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1`}>
+    <CardHeader className="pb-6">
+      <div className="flex items-center gap-4">
+        <div className={`h-14 w-14 bg-gradient-to-br ${stat.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
+          <stat.icon className="h-7 w-7 text-white" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{stat.label}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Current count</p>
+        </div>
+      </div>
+    </CardHeader>
+    <CardContent className="pt-0">
+      {isLoading ? (
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      ) : (
+        <>
+          <p className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {value}
+          </p>
+          <p className={`text-sm ${stat.textColor} font-medium`}>
+            {value === 1 ? stat.label.slice(0, -1) : stat.label}
+          </p>
+        </>
+      )}
+    </CardContent>
+  </Card>
+));
+
+StatCard.displayName = 'StatCard';
+
 export default function TaskManagement() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
-    const { tasks, refreshTasks, isLoading: tasksLoading } = useTask();
+    
+    // Use optimized tasks hook
+    const { 
+      taskStats, 
+      isLoading: tasksLoading, 
+      error: tasksError,
+      completionRate,
+      hasAnyTasks
+    } = useOptimizedTasks();
+    
     const { refreshKey } = useTaskStore();
     const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
+    
     // Enable page refresh detection
     usePageRefresh();
-
-    // Calculate task stats from tasks array
-    const taskStats = useMemo(() => {
-        if (!tasks || tasks.length === 0) return INITIAL_TASK_LIST;
-
-        return {
-            total: tasks.length,
-            todo: tasks.filter(task => task.status === 'todo').length,
-            inProgress: tasks.filter(task => task.status === 'in-progress').length,
-            done: tasks.filter(task => task.status === 'completed').length,
-        };
-    }, [tasks]);
-
-    // Calculate completion percentage
-    const completionPercentage = useMemo(() => {
-        if (taskStats.total === 0) return 0;
-        return Math.round((taskStats.done / taskStats.total) * 100);
-    }, [taskStats]);
 
     // Load tasks when user is available
     useEffect(() => {
@@ -100,9 +136,9 @@ export default function TaskManagement() {
     useEffect(() => {
         if (refreshKey > 0 && user?.id) {
             console.log("🔄 TaskManagement: Store triggered refresh");
-            refreshTasks();
+            // Tasks are automatically managed by useOptimizedTasks hook
         }
-    }, [refreshKey, user?.id, refreshTasks]);
+    }, [refreshKey, user?.id]);
 
     if (loading || tasksLoading) {
         return (
@@ -252,7 +288,7 @@ export default function TaskManagement() {
                             </div>
                             <div className="text-left sm:text-right">
                                 <span className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                    {completionPercentage}%
+                                    {completionRate}%
                                 </span>
                                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">completed</p>
                             </div>
@@ -262,13 +298,13 @@ export default function TaskManagement() {
                             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 sm:h-4 shadow-inner">
                                 <div 
                                     className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out shadow-lg relative overflow-hidden"
-                                    style={{ width: `${completionPercentage}%` }}
+                                    style={{ width: `${completionRate}%` }}
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
                                 </div>
                             </div>
                             <div className="absolute right-0 top-4 sm:top-6 text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                {taskStats.done} of {taskStats.total} tasks completed
+                                {taskStats.completed} of {taskStats.total} tasks completed
                             </div>
                         </div>
                     </div>
@@ -340,7 +376,7 @@ export default function TaskManagement() {
                         </CardHeader>
                         <CardContent className="pt-0">
                             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                                {taskStats.done}
+                                {taskStats.completed}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Tasks finished
@@ -362,7 +398,7 @@ export default function TaskManagement() {
                         </CardHeader>
                         <CardContent className="pt-0">
                             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                                {completionPercentage}%
+                                {completionRate}%
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Overall efficiency

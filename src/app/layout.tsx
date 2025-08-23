@@ -5,6 +5,7 @@ import { ThemeProvider } from "../context/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import { getFontVariables } from "@/utils/fonts";
 import GlobalPresence from "@/context/GloBalPresence";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const metadata: Metadata = {
   title: "Task Management System",
@@ -67,7 +68,9 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <GlobalPresence>
-              {children}
+              <ProtectedRoute>
+                {children}
+              </ProtectedRoute>
             </GlobalPresence>
           </AuthProvider>
         </ThemeProvider>

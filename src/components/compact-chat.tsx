@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send, MessageCircle } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, memo } from 'react'
 
 interface CompactChatProps {
   roomName: string
@@ -19,12 +19,13 @@ interface CompactChatProps {
 
 /**
  * Compact chat component for small windows
+ * Optimized with memo to prevent unnecessary re-renders
  */
-export const CompactChat = ({
+export const CompactChat = memo(({
   roomName,
   username,
 }: CompactChatProps) => {
-  const { containerRef } = useChatScroll()
+  const { containerRef, scrollToBottom } = useChatScroll<HTMLDivElement>();
 
   const {
     messages,
@@ -41,7 +42,7 @@ export const CompactChat = ({
     (e: React.FormEvent) => {
       e.preventDefault()
       if (!newMessage.trim() || !isConnected) return
-
+      scrollToBottom();
       sendMessage(newMessage)
       setNewMessage('')
     },
@@ -64,7 +65,7 @@ export const CompactChat = ({
       {/* Messages */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-gradient-to-b from-background/50 to-muted/5"
+        className="flex-1 overflow-y-auto p-4 space-y-3 min-h-10 z-auto  bg-gradient-to-b from-background/50 to-muted/5"
       >
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
@@ -98,33 +99,42 @@ export const CompactChat = ({
         })}
       </div>
 
-      {/* Input */}
-      <form
-        onSubmit={handleSendMessage}
-        className="flex gap-2 border-t border-border/50 p-4 bg-gradient-to-r from-background/80 to-muted/10"
-      >
-        <Input
-          className="text-sm flex-1 border-muted-foreground/20 focus:border-blue-500 transition-colors rounded-xl"
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
-          disabled={!isConnected}
-        />
-        <Button
-          type="submit"
-          size="sm"
-          disabled={!isConnected || !newMessage.trim()}
-          className={cn(
-            "h-9 w-9 p-0 rounded-xl transition-all duration-200",
-            !isConnected || !newMessage.trim() 
-              ? "bg-muted text-muted-foreground" 
-              : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 shadow-lg"
-          )}
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-      </form>
+     {/* Input */}
+<form
+  onSubmit={handleSendMessage}
+  className="flex gap-2 border-t border-border/50 p-4 bg-gradient-to-r from-background/80 to-muted/10"
+>
+  <textarea
+    className="text-sm flex-1 border border-muted-foreground/20 focus:border-blue-500 transition-colors rounded-xl p-2 resize-none max-h-32 overflow-y-auto"
+    rows={1}
+    value={newMessage}
+    onChange={(e) => setNewMessage(e.target.value)}
+    placeholder="Type a message..."
+    disabled={!isConnected}
+    onKeyDown={(e) => {
+      // Cho phép Enter để gửi, Shift+Enter để xuống dòng
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault()
+        handleSendMessage(e as any)
+      }
+    }}
+  />
+  
+  <Button
+    type="submit"
+    size="sm"
+    disabled={!isConnected || !newMessage.trim()}
+    className={cn(
+      "h-9 w-9 p-0 rounded-xl transition-all duration-200",
+      !isConnected || !newMessage.trim() 
+        ? "bg-muted text-muted-foreground" 
+        : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 shadow-lg"
+    )}
+  >
+    <Send className="h-4 w-4" />
+  </Button>
+</form>
+
     </div>
   )
-}
+})

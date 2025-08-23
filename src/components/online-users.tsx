@@ -1,7 +1,7 @@
-    'use client'
+'use client'
 
-import { useState, useContext, useRef, useEffect } from 'react'
-import { PresenceContext, PresenceUser } from '@/context/GloBalPresence'
+import { useState, useRef, useEffect, useCallback, memo } from 'react'
+import { PresenceUser } from '@/context/GloBalPresence'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { MessageCircle, Users, X } from 'lucide-react'
 import { CompactChat } from '@/components/compact-chat'
 import { useAuth } from '@/hooks/use-auth'
+import { useOptimizedPresence } from '@/hooks/use-optimized-presence'
 import { cn } from '@/lib/utils'
 
 interface ChatSession {
@@ -16,62 +17,102 @@ interface ChatSession {
   roomName: string
 }
 
-export default function OnlineUsers() {
-  const onlineUsers = useContext(PresenceContext) || []
+// Memoized user item component to prevent unnecessary re-renders
+const UserItem = memo(({ 
+  presenceUser, 
+  onStartChat 
+}: { 
+  presenceUser: PresenceUser; 
+  onStartChat: (user: PresenceUser) => void;
+}) => (
+  <div className={cn(
+    "flex items-center gap-3 p-4 transition-all duration-200",
+    "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50",
+    "dark:hover:from-blue-950/30 dark:hover:to-purple-950/30",
+    "border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0",
+    "group"
+  )}>
+    <div className="relative">
+      <Avatar className="h-10 w-10 ring-2 ring-green-200/50 dark:ring-green-800/50 transition-all duration-200 group-hover:ring-green-300 dark:group-hover:ring-green-700">
+        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm">
+          {presenceUser.username.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></div>
+    </div>
+    
+    <div className="flex-1 min-w-0">
+      <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate text-sm">
+        {presenceUser.username}
+      </h4>
+      <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+        Active now
+      </p>
+    </div>
+
+    <Button
+      size="sm"
+      onClick={() => onStartChat(presenceUser)}
+      className={cn(
+        "opacity-0 group-hover:opacity-100 transition-all duration-200",
+        "bg-gradient-to-r from-blue-500 to-purple-600",
+        "hover:from-blue-600 hover:to-purple-700",
+        "text-white shadow-md hover:shadow-lg hover:scale-105",
+        "h-8 w-8 p-0 rounded-full"
+      )}
+    >
+      <MessageCircle className="h-4 w-4" />
+    </Button>
+  </div>
+))
+
+UserItem.displayName = 'UserItem'
+
+const OnlineUsers = memo(() => {
+  const { filteredUsers } = useOptimizedPresence()
   const { user } = useAuth()
   const [showUsersList, setShowUsersList] = useState(false)
   const [activeChatSessions, setActiveChatSessions] = useState<ChatSession[]>([])
   const popupRef = useRef<HTMLDivElement>(null)
 
-  // Lọc bỏ user hiện tại khỏi danh sách
-  const filteredUsers = onlineUsers.filter(u => u.id !== user?.id)
-
-  // Đóng popup khi click bên ngoài
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-        setShowUsersList(false)
-      }
+  // Optimized click outside handler
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+      setShowUsersList(false)
     }
+  }, [])
 
+  useEffect(() => {
     if (showUsersList) {
       document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
     }
+  }, [showUsersList, handleClickOutside])
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showUsersList])
-
-  const startChat = (targetUser: PresenceUser) => {
-    // Tạo room name duy nhất cho 2 user (sắp xếp theo ID để đảm bảo consistency)
-    const sortedIds = [user?.id, targetUser.id].sort()
+  const startChat = useCallback((targetUser: PresenceUser) => {
+    if (!user?.id) return
+    
+    const sortedIds = [user.id, targetUser.id].sort()
     const roomName = `chat-${sortedIds.join('-')}`
 
-    // Kiểm tra xem đã có chat session này chưa
-    const existingSession = activeChatSessions.find(
-      session => session.roomName === roomName
-    )
-
-    if (!existingSession) {
-      setActiveChatSessions(prev => [
-        ...prev,
-        { targetUser, roomName }
-      ])
-    }
+    setActiveChatSessions(prev => {
+      const existingSession = prev.find(session => session.roomName === roomName)
+      if (!existingSession) {
+        return [...prev, { targetUser, roomName }]
+      }
+      return prev
+    })
 
     setShowUsersList(false)
-  }
+  }, [user?.id])
 
-  const closeChatSession = (roomName: string) => {
-    setActiveChatSessions(prev => 
-      prev.filter(session => session.roomName !== roomName)
-    )
-  }
+  const closeChatSession = useCallback((roomName: string) => {
+    setActiveChatSessions(prev => prev.filter(session => session.roomName !== roomName))
+  }, [])
 
-  const getCurrentUsername = () => {
+  const getCurrentUsername = useCallback(() => {
     return user?.user_metadata?.username || user?.email || 'Anonymous'
-  }
+  }, [user])
 
   return (
     <>
@@ -146,50 +187,12 @@ export default function OnlineUsers() {
                 </div>
               ) : (
                 <div className="max-h-80 overflow-y-auto">
-                  {filteredUsers.map((presenceUser, index) => (
-                    <div
+                  {filteredUsers.map((presenceUser) => (
+                    <UserItem
                       key={presenceUser.id}
-                      className={cn(
-                        "flex items-center gap-3 p-4 transition-all duration-200",
-                        "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50",
-                        "dark:hover:from-blue-950/30 dark:hover:to-purple-950/30",
-                        "border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0",
-                        "group"
-                      )}
-                    >
-                      <div className="relative">
-                        <Avatar className="h-10 w-10 ring-2 ring-green-200 dark:ring-green-800 transition-all duration-200 group-hover:ring-green-300 dark:group-hover:ring-green-700">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                            {presenceUser.username.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></div>
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {presenceUser.username}
-                        </p>
-                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                          Active now
-                        </p>
-                      </div>
-
-                      <Button
-                        size="sm"
-                        onClick={() => startChat(presenceUser)}
-                        className={cn(
-                          "h-8 w-8 p-0 rounded-full",
-                          "bg-gradient-to-r from-blue-500 to-purple-600",
-                          "hover:from-blue-600 hover:to-purple-700",
-                          "text-white shadow-md hover:shadow-lg",
-                          "transition-all duration-200 hover:scale-110",
-                          "opacity-0 group-hover:opacity-100"
-                        )}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                    </div>
+                      presenceUser={presenceUser}
+                      onStartChat={startChat}
+                    />
                   ))}
                 </div>
               )}
@@ -248,4 +251,8 @@ export default function OnlineUsers() {
       </div>
     </>
   )
-}
+})
+
+OnlineUsers.displayName = 'OnlineUsers'
+
+export default OnlineUsers
