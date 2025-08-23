@@ -2,12 +2,14 @@
 'use client'
 
 import { useContext, useMemo } from 'react'
-import { PresenceContext, PresenceUser } from '@/context/GloBalPresence'
+import { SimplePresenceContext, SimplePresenceUser } from '@/context/SimplePresence'
 import { useAuth } from '@/hooks/use-auth'
 import { useDebounce } from '@/hooks/use-debounce'
 
+export type PresenceUser = SimplePresenceUser
+
 export function useOptimizedPresence() {
-  const onlineUsers = useContext(PresenceContext) || []
+  const onlineUsers = useContext(SimplePresenceContext) || []
   const { user } = useAuth()
   
   // Debounce online users to reduce re-renders

@@ -24,84 +24,67 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
   const maxRetries = 3;
   const retryCountRef = useRef(0);
 
-  // Tab visibility management
+  // Tab visibility management - simplified
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isVisible = !document.hidden;
       setIsTabActive(isVisible);
       
-      // Disconnect when tab becomes hidden to save resources
-      if (!isVisible && channelRef.current) {
-        console.log('Tab hidden, disconnecting presence');
-        channelRef.current.unsubscribe();
-        channelRef.current = null;
-        setIsConnected(false);
-      } else if (isVisible && user?.id && !channelRef.current) {
-        // Reconnect when tab becomes active again
-        console.log('Tab visible, reconnecting presence');
-        connectToPresence();
+      if (!isVisible) {
+        console.log('Tab hidden, pausing presence updates');
+      } else {
+        console.log('Tab visible, resuming presence updates');
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Handle page unload
-    const handleBeforeUnload = () => {
-      if (channelRef.current) {
-        channelRef.current.unsubscribe();
-      }
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [user?.id]);
+  }, []);
 
-  // Debounced update function with error handling
+  // Simplified debounced update function
   const debouncedSetUsers = useCallback((users: PresenceUser[]) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     timeoutRef.current = setTimeout(() => {
-      setOnlineUsers(prev => {
-        // Only update if users actually changed
-        if (JSON.stringify(prev) !== JSON.stringify(users)) {
-          return users;
-        }
-        return prev;
-      });
-    }, 200); // Increased debounce time
+      console.log('Setting online users:', users);
+      setOnlineUsers(users);
+    }, 100);
   }, []);
 
-  // Connection function with retry logic
+  // Connection function with simplified logic
   const connectToPresence = useCallback(async () => {
-    if (!user?.id || !isTabActive) return;
+    if (!user?.id) {
+      console.log('No user ID, skipping presence connection');
+      return;
+    }
 
     try {
       // Cleanup previous channel if exists
       if (channelRef.current) {
+        console.log('Cleaning up previous channel');
         channelRef.current.unsubscribe();
       }
 
-      const channel = supabase.channel(`global-presence-${user.id}-${Date.now()}`, {
+      console.log('Creating new presence channel for user:', user.id);
+      const channel = supabase.channel(`global-presence`, {
         config: {
           presence: { key: user.id },
-          broadcast: { self: false },
-          private: false
+          broadcast: { self: false }
         },
       });
 
       channelRef.current = channel;
 
-      // Presence sync handler with error handling
+      // Simplified presence sync handler
       const handlePresenceSync = () => {
-        try {
-          if (!isTabActive) return; // Skip if tab is not active
-          
+        try {          
           const state = channel.presenceState();
+          console.log('Presence state updated:', state);
+          
           const uniqueUsers = new Map<string, PresenceUser>();
           
           Object.keys(state).forEach((key) => {
@@ -120,8 +103,8 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
           });
           
           const users = Array.from(uniqueUsers.values());
+          console.log('Online users:', users);
           debouncedSetUsers(users);
-          retryCountRef.current = 0; // Reset retry count on success
         } catch (error) {
           console.error('Error processing presence state:', error);
         }
@@ -132,7 +115,7 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
       channel.on("presence", { event: "join" }, handlePresenceSync);
       channel.on("presence", { event: "leave" }, handlePresenceSync);
 
-      // Subscribe to channel with retry logic
+      // Subscribe to channel
       channel.subscribe(async (status) => {
         console.log('Presence channel status:', status);
         
@@ -140,6 +123,7 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
           setIsConnected(true);
           const username = user.user_metadata?.username || user.email || "Anonymous";
           
+          console.log('Tracking presence for:', username);
           try {
             await channel.track({
               username: username,
@@ -149,20 +133,6 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
           } catch (error) {
             console.error('Error tracking presence:', error);
           }
-        } else if (status === "CHANNEL_ERROR" && retryCountRef.current < maxRetries) {
-          retryCountRef.current++;
-          console.log(`Retrying connection... Attempt ${retryCountRef.current}`);
-          
-          // Retry with exponential backoff
-          if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current);
-          }
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (isTabActive) {
-              connectToPresence();
-            }
-          }, Math.pow(2, retryCountRef.current) * 1000);
         } else {
           setIsConnected(false);
         }
@@ -172,7 +142,7 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
       console.error('Error setting up presence channel:', error);
       setIsConnected(false);
     }
-  }, [user?.id, isTabActive, debouncedSetUsers]);
+  }, [user?.id, debouncedSetUsers]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -181,13 +151,13 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
       return;
     }
 
-    // Only connect if tab is active
-    if (isTabActive) {
-      connectToPresence();
-    }
+    // Always try to connect when user is available, regardless of tab state
+    console.log('Connecting to presence for user:', user.id);
+    connectToPresence();
 
     // Cleanup function
     return () => {
+      console.log('Cleaning up presence connection');
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -200,7 +170,7 @@ export default function GlobalPresence({ children }: { children?: React.ReactNod
       }
       setIsConnected(false);
     };
-  }, [connectToPresence]);
+  }, [user?.id]); // Remove other dependencies that cause unnecessary reconnections
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => onlineUsers, [onlineUsers]);

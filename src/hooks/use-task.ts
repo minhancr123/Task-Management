@@ -19,7 +19,8 @@ export const useTask = () => {
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
     const cacheRef = useRef<TaskCache | null>(null);
-    const abortControllerRef = useRef<AbortController | null>(null);
+    const isFetchingRef = useRef(false); // Prevent concurrent fetches
+    const requestIdRef = useRef(0);      // Track latest request để bỏ qua phản hồi cũ
 
     // Debounce tasks to reduce re-renders
     const debouncedTasks = useDebounce(tasks, 100);
@@ -44,64 +45,62 @@ export const useTask = () => {
 
     const fetchAllTasks = useCallback(async (forceRefresh = false) => {
         if (!user?.id) {
+            console.log("❌ No user ID, clearing tasks");
             setTasks([]);
             setError(null);
+            setIsLoading(false);
             return;
         }
 
-        // Check cache first (unless force refresh)
+        if (isFetchingRef.current && !forceRefresh) {
+            console.log("🔄 Already fetching tasks, skipping...");
+            return;
+        }
+
         if (!forceRefresh && isCacheValid(cacheRef.current, user.id)) {
             console.log("📋 Using cached tasks");
             setTasks(cacheRef.current!.data);
+            setIsLoading(false);
             return cacheRef.current!.data;
         }
 
-        // Cancel previous request if ongoing
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-
-        // Create new abort controller
-        abortControllerRef.current = new AbortController();
-
+        isFetchingRef.current = true;
+        const currentRequestId = ++requestIdRef.current; // gán id mới cho request
         try {
             setIsLoading(true);
             setError(null);
-            
-            console.log("🔄 Fetching tasks for user:", user.id);
-            
+            console.log("🔄 Fetching tasks for user:", user.id, "requestId:", currentRequestId);
+
             const { data, error: fetchError } = await supabase
                 .from("tasks")
                 .select("*")
                 .eq("user_id", user.id)
-                .order("created_at", { ascending: false })
-                .abortSignal(abortControllerRef.current.signal);
+                .order("created_at", { ascending: false });
+
+            // Nếu có request mới hơn thì bỏ qua phản hồi này
+            if (currentRequestId !== requestIdRef.current) {
+                console.log("⚠️ Stale response ignored for requestId", currentRequestId);
+                return;
+            }
 
             if (fetchError) throw new Error(fetchError.message);
 
             const tasksData = data || [];
-            
-            // Update cache
             cacheRef.current = {
                 data: tasksData,
                 timestamp: Date.now(),
                 userId: user.id
             };
-
             setTasks(tasksData);
             console.log("✅ Tasks loaded:", tasksData.length);
-            
             return tasksData;
-        } catch (error: any) {
-            if (error.name === 'AbortError') {
-                console.log("🚫 Task fetch aborted");
+        } catch (e: any) {
+            if (currentRequestId !== requestIdRef.current) {
+                console.log("⚠️ Error from stale request ignored", e?.message);
                 return;
             }
-            
-            console.error("❌ Error fetching tasks:", error);
-            setError(error.message);
-            
-            // If cache exists, use it as fallback
+            console.error("❌ Error fetching tasks (no abort controller):", e);
+            setError(e.message || 'Unknown error');
             if (cacheRef.current && cacheRef.current.userId === user.id) {
                 console.log("📋 Using cached tasks as fallback");
                 setTasks(cacheRef.current.data);
@@ -109,82 +108,51 @@ export const useTask = () => {
                 setTasks([]);
             }
         } finally {
-            setIsLoading(false);
-            abortControllerRef.current = null;
+            if (currentRequestId === requestIdRef.current) {
+                setIsLoading(false);
+                isFetchingRef.current = false;
+            }
         }
     }, [user?.id, isCacheValid]);
 
     const refreshTasks = useCallback(async () => {
         console.log("🔄 Manually refreshing tasks...");
-        await fetchAllTasks(true); // Force refresh
+        await fetchAllTasks(true);
         console.log("✅ Manual refresh completed");
     }, [fetchAllTasks]);
 
-    // Clear cache when user changes
     useEffect(() => {
         if (cacheRef.current && cacheRef.current.userId !== user?.id) {
             cacheRef.current = null;
         }
     }, [user?.id]);
 
-    // Initial fetch when user is available
+    // Initial fetch guard chống StrictMode double-mount
+    const didFirstFetchRef = useRef(false);
     useEffect(() => {
-        if (user?.id) {
-            console.log("🚀 useTask: User available, fetching tasks");
-            fetchAllTasks();
-        } else {
-            console.log("❌ useTask: No user, clearing tasks");
+        if (!user?.id) {
             setTasks([]);
             setError(null);
+            setIsLoading(false);
             cacheRef.current = null;
+            didFirstFetchRef.current = false;
+            return;
         }
-
-        // Cleanup on unmount
-        return () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-        };
+        if (didFirstFetchRef.current) {
+            // mount lần 2 của StrictMode -> bỏ qua
+            return;
+        }
+        didFirstFetchRef.current = true;
+        console.log("🚀 useTask initial fetch for user", user.id);
+        fetchAllTasks();
     }, [user?.id, fetchAllTasks]);
 
-    // Smart auto-refresh on visibility/focus changes
-    // useEffect(() => {
-        // let refreshTimeout: NodeJS.Timeout;
-        
-        // const handleVisibilityChange = () => {
-        //     if (!document.hidden && user?.id) {
-        //         // Check if cache is stale when page becomes visible
-        //         if (!isCacheValid(cacheRef.current, user.id)) {
-        //             console.log("👁️ Page visible with stale cache, refreshing tasks");
-        //             refreshTimeout = setTimeout(() => fetchAllTasks(true), 500);
-        //         }
-        //     }
-        // };
-
-        // const handleFocus = () => {
-        //     if (user?.id && !isCacheValid(cacheRef.current, user.id)) {
-        //         console.log("🎯 Window focused with stale cache, refreshing tasks");
-        //         refreshTimeout = setTimeout(() => fetchAllTasks(true), 500);
-        //     }
-        // };
-
-        // document.addEventListener('visibilitychange', handleVisibilityChange);
-        // window.addEventListener('focus', handleFocus);
-
-        // return () => {
-        //     clearTimeout(refreshTimeout);
-        //     // document.removeEventListener('visibilitychange', handleVisibilityChange);
-        //     window.removeEventListener('focus', handleFocus);
-        // };
-    // }, [user?.id, fetchAllTasks, isCacheValid]);
-    
     return {
         tasks: debouncedTasks,
         taskStats,
         refreshTasks,
         isLoading,
         error,
-        // Utility functions
         addOptimisticTask: useCallback((task: TaskFormData) => {
             setTasks(prev => [task, ...prev]);
         }, []),

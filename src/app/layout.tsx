@@ -4,8 +4,9 @@ import AuthProvider from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import { getFontVariables } from "@/utils/fonts";
-import GlobalPresence from "@/context/GloBalPresence";
+import SimplePresence from "@/context/SimplePresence";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PresenceDebug } from "@/components/PresenceDebug";
 
 export const metadata: Metadata = {
   title: "Task Management System",
@@ -67,11 +68,11 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <GlobalPresence>
+            <SimplePresence>
               <ProtectedRoute>
                 {children}
               </ProtectedRoute>
-            </GlobalPresence>
+            </SimplePresence>
           </AuthProvider>
         </ThemeProvider>
         <Toaster />

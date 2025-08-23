@@ -22,16 +22,25 @@ export function useOptimizedTasks() {
   // Debounce task stats to prevent excessive re-calculations
   const debouncedTaskStats = useDebounce(taskStats, 150);
 
-  // Listen to store refresh triggers
+  // Listen to store refresh triggers with better error handling
   useEffect(() => {
     if (refreshKey > 0) {
       console.log("🔄 OptimizedTasks: Responding to store refresh trigger");
       setRefreshing(true);
-      refreshTasks().finally(() => {
-        setRefreshing(false);
-      });
+      
+      const performRefresh = async () => {
+        try {
+          await refreshTasks();
+        } catch (error) {
+          console.error("Error during task refresh:", error);
+        } finally {
+          setRefreshing(false);
+        }
+      };
+      
+      performRefresh();
     }
-  }, [refreshKey, refreshTasks, setRefreshing]);
+  }, [refreshKey]); // Remove refreshTasks dependency to prevent loops
 
   // Memoized task collections for performance
   const taskCollections = useMemo(() => {

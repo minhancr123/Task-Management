@@ -21,24 +21,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Memoized fetch profile function to prevent unnecessary re-renders
+  // Simplified fetchProfile: no extra auth.getUser round-trip
   const fetchProfile = useCallback(async (userId: string) => {
     try {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
-
-      if (!currentUser) {
-        setProfile(null);
-        return;
-      }
-
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
-
       if (error) throw error;
       setProfile(data);
     } catch (err) {
@@ -48,60 +38,42 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }, []);
 
   useEffect(() => {
-    let isMounted = true; // Prevent state updates if component unmounts
+    let isMounted = true;
 
     const getInitSession = async () => {
       try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-
+        const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
-
-        if (isMounted) {
-          setUser(session?.user || null);
-          if (session?.user) {
-            await fetchProfile(session.user.id);
-          }
+        if (!isMounted) return;
+        setUser(session?.user || null);
+        // Do not block UI while fetching profile
+        setLoading(false);
+        if (session?.user) {
+          fetchProfile(session.user.id); // fire & forget
+        } else {
+          setProfile(null);
         }
       } catch (err) {
         console.error("Error getting session:", err);
         if (isMounted) {
           setUser(null);
           setProfile(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false); // luôn chạy dù thành công hay lỗi
+          setLoading(false);
         }
       }
     };
 
     getInitSession();
 
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      try {
-        if (isMounted) {
-          setUser(session?.user || null);
-          if (session?.user) {
-            await fetchProfile(session.user.id);
-          } else {
-            setProfile(null);
-          }
-        }
-      } catch (err) {
-        console.error("Error handling auth state change:", err);
-        if (isMounted) {
-          setProfile(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) return;
+      setUser(session?.user || null);
+      // Release loading immediately, profile fetch async
+      setLoading(false);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
       }
     });
 

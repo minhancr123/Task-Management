@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { PresenceUser } from '@/context/GloBalPresence'
+import { useOptimizedPresence, PresenceUser } from '@/hooks/use-optimized-presence'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { MessageCircle, Users, X } from 'lucide-react'
 import { CompactChat } from '@/components/compact-chat'
 import { useAuth } from '@/hooks/use-auth'
-import { useOptimizedPresence } from '@/hooks/use-optimized-presence'
 import { cn } from '@/lib/utils'
 
 interface ChatSession {
@@ -69,7 +68,7 @@ const UserItem = memo(({
 UserItem.displayName = 'UserItem'
 
 const OnlineUsers = memo(() => {
-  const { filteredUsers } = useOptimizedPresence()
+  const { filteredUsers, totalOnline } = useOptimizedPresence()
   const { user } = useAuth()
   const [showUsersList, setShowUsersList] = useState(false)
   const [activeChatSessions, setActiveChatSessions] = useState<ChatSession[]>([])
@@ -118,7 +117,7 @@ const OnlineUsers = memo(() => {
     <>
       {/* Debug info - tạm thời */}
       <div className="fixed top-4 left-4 z-[102] bg-black/80 text-white p-2 text-xs rounded">
-        Show: {showUsersList.toString()} | Users: {filteredUsers.length}
+        Show: {showUsersList.toString()} | Users: {filteredUsers.length} | Total: {totalOnline}
       </div>
       
       {/* Fixed position button ở góc dưới phải */}

@@ -103,9 +103,8 @@ const StatCard = memo(({
 StatCard.displayName = 'StatCard';
 
 export default function TaskManagement() {
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     
     // Use optimized tasks hook
     const { 
@@ -122,15 +121,14 @@ export default function TaskManagement() {
     // Enable page refresh detection
     usePageRefresh();
 
-    // Load tasks when user is available
+    // Handle tasks error
     useEffect(() => {
-        if (user?.id) {
-            setLoading(false);
-            console.log("🏠 TaskManagement: User available, tasks will load from useTask hook");
+        if (tasksError) {
+            setError(tasksError);
         } else {
-            setLoading(true);
+            setError(null);
         }
-    }, [user?.id]);
+    }, [tasksError]);
 
     // Handle refresh trigger from store only (after CRUD operations) 
     useEffect(() => {
@@ -140,7 +138,8 @@ export default function TaskManagement() {
         }
     }, [refreshKey, user?.id]);
 
-    if (loading || tasksLoading) {
+    // Show loading only when auth is loading or when we have a user but tasks are still loading initially
+    if (authLoading || (user?.id && tasksLoading && !hasAnyTasks)) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
                 <div className="container mx-auto p-6 space-y-8">
