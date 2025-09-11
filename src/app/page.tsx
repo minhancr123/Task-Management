@@ -8,7 +8,7 @@ import FloatingActionButton from "@/components/FloatingActionButton";
 
 export default function Home() {
   return (
-    <ProtectedRoute>
+   
       <div className="min-h-screen bg-gradient-to-b from-background to-muted dark:to-muted">
         <div className="container mx-auto p-4 lg:p-12">
           {/* Header */}
@@ -18,9 +18,8 @@ export default function Home() {
           <TaskManagement />
           
           {/* Floating Action Button */}
-          <FloatingActionButton />
+          {/* <FloatingActionButton /> */}
         </div>
       </div>
-    </ProtectedRoute>
   );
 }

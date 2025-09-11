@@ -10,6 +10,7 @@ import { MessageCircle, Users, X } from 'lucide-react'
 import { CompactChat } from '@/components/compact-chat'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
+import { useChatNotifications } from '@/context/ChatNotificationsContext'
 
 interface ChatSession {
   targetUser: PresenceUser
@@ -19,10 +20,12 @@ interface ChatSession {
 // Memoized user item component to prevent unnecessary re-renders
 const UserItem = memo(({ 
   presenceUser, 
-  onStartChat 
+  onStartChat,
+  unread
 }: { 
   presenceUser: PresenceUser; 
   onStartChat: (user: PresenceUser) => void;
+  unread: number;
 }) => (
   <div className={cn(
     "flex items-center gap-3 p-4 transition-all duration-200",
@@ -38,6 +41,9 @@ const UserItem = memo(({
         </AvatarFallback>
       </Avatar>
       <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></div>
+      {unread > 0 && (
+        <div className="absolute -top-1 -left-1 bg-red-600 text-white text-[10px] px-1 rounded-full shadow">{unread}</div>
+      )}
     </div>
     
     <div className="flex-1 min-w-0">
@@ -70,6 +76,7 @@ UserItem.displayName = 'UserItem'
 const OnlineUsers = memo(() => {
   const { filteredUsers, totalOnline } = useOptimizedPresence()
   const { user } = useAuth()
+  const { unread, reset } = useChatNotifications()
   const [showUsersList, setShowUsersList] = useState(false)
   const [activeChatSessions, setActiveChatSessions] = useState<ChatSession[]>([])
   const popupRef = useRef<HTMLDivElement>(null)
@@ -102,8 +109,9 @@ const OnlineUsers = memo(() => {
       return prev
     })
 
+    reset(roomName)
     setShowUsersList(false)
-  }, [user?.id])
+  }, [user?.id, reset])
 
   const closeChatSession = useCallback((roomName: string) => {
     setActiveChatSessions(prev => prev.filter(session => session.roomName !== roomName))
@@ -116,9 +124,9 @@ const OnlineUsers = memo(() => {
   return (
     <>
       {/* Debug info - tạm thời */}
-      <div className="fixed top-4 left-4 z-[102] bg-black/80 text-white p-2 text-xs rounded">
+      {/* <div className="fixed top-4 left-4 z-[102] bg-black/80 text-white p-2 text-xs rounded">
         Show: {showUsersList.toString()} | Users: {filteredUsers.length} | Total: {totalOnline}
-      </div>
+      </div> */}
       
       {/* Fixed position button ở góc dưới phải */}
       <div className="fixed bottom-6 right-6 z-[100]">
@@ -186,13 +194,18 @@ const OnlineUsers = memo(() => {
                 </div>
               ) : (
                 <div className="max-h-80 overflow-y-auto">
-                  {filteredUsers.map((presenceUser) => (
-                    <UserItem
-                      key={presenceUser.id}
-                      presenceUser={presenceUser}
-                      onStartChat={startChat}
-                    />
-                  ))}
+                  {filteredUsers.map((presenceUser) => {
+                    const sortedIds = [user!.id, presenceUser.id].sort()
+                    const roomName = `chat-${sortedIds.join('-')}`
+                    return (
+                      <UserItem
+                        key={presenceUser.id}
+                        presenceUser={presenceUser}
+                        unread={unread[roomName] || 0}
+                        onStartChat={startChat}
+                      />
+                    )
+                  })}
                 </div>
               )}
             </CardContent>
@@ -241,7 +254,7 @@ const OnlineUsers = memo(() => {
               <CardContent className="flex-1 p-0 overflow-hidden">
                 <CompactChat
                   roomName={session.roomName}
-                  username={getCurrentUsername()}
+                  username={user?.user_metadata?.username || user?.email || 'Anonymous'}
                 />
               </CardContent>
             </Card>

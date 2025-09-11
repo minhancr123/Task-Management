@@ -7,6 +7,7 @@ import { getFontVariables } from "@/utils/fonts";
 import SimplePresence from "@/context/SimplePresence";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PresenceDebug } from "@/components/PresenceDebug";
+import { ChatNotificationsProvider } from "@/context/ChatNotificationsContext";
 
 export const metadata: Metadata = {
   title: "Task Management System",
@@ -68,11 +69,13 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <SimplePresence>
-              <ProtectedRoute>
-                {children}
-              </ProtectedRoute>
-            </SimplePresence>
+            <ChatNotificationsProvider>
+              <SimplePresence>
+                <ProtectedRoute>
+                  {children}
+                </ProtectedRoute>
+              </SimplePresence>
+            </ChatNotificationsProvider>
           </AuthProvider>
         </ThemeProvider>
         <Toaster />

@@ -2,6 +2,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "./ui/button";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -60,6 +61,9 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
             <p className="text-gray-600 dark:text-gray-400">
               Please log in to access this page.
             </p>
+            <Button variant="outline" className="mt-4" onClick={() => router.push("/auth")}>
+              Go to Login
+            </Button>
           </div>
         </div>
       )
