@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 
 interface RealtimeChatProps {
@@ -36,6 +36,8 @@ export const RealtimeChat = ({
     messages: realtimeMessages,
     sendMessage,
     isConnected,
+    typingUsers,
+    sendTyping
   } = useRealtimeChat({
     roomName,
     username,
@@ -43,6 +45,9 @@ export const RealtimeChat = ({
 
   const [newMessage, setNewMessage] = useState('')
   const [onlineUsers, setOnlineUsers] = useState<string[]>([])
+
+  // Typing timeout ref
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // merge messages
   const allMessages = useMemo(() => {
@@ -102,15 +107,32 @@ export const RealtimeChat = ({
 
       sendMessage(newMessage)
       setNewMessage('')
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      sendTyping(false);
     },
-    [newMessage, isConnected, sendMessage]
+    [newMessage, isConnected, sendMessage, sendTyping]
   )
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+
+    if (!typingTimeoutRef.current) {
+      sendTyping(true);
+    }
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    typingTimeoutRef.current = setTimeout(() => {
+      sendTyping(false);
+      typingTimeoutRef.current = null;
+    }, 2000);
+  };
+
   return (
-    <div className="flex flex-col h-full max-h-80 w-full bg-background text-foreground antialiased">
+    <div className="flex flex-col h-full w-full bg-background text-foreground antialiased">
       {/* Messages */}
       <div
-        ref={containerRef}
+        ref={containerRef as React.RefObject<HTMLDivElement>}
         className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"
       >
         {allMessages.length === 0 && (
@@ -142,6 +164,13 @@ export const RealtimeChat = ({
         </div>
       </div>
 
+      {/* Typing Indicator */}
+      {typingUsers.size > 0 && (
+        <div className="px-4 py-1 text-xs text-muted-foreground italic animate-pulse">
+          {Array.from(typingUsers).join(', ')} is typing...
+        </div>
+      )}
+
       {/* Online users */}
       {onlineUsers.length > 0 && (
         <div className="p-4 bg-muted text-muted-foreground text-sm">
@@ -163,7 +192,7 @@ export const RealtimeChat = ({
           )}
           type="text"
           value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Type a message..."
           disabled={!isConnected}
         />

@@ -8,6 +8,7 @@ import SimplePresence from "@/context/SimplePresence";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PresenceDebug } from "@/components/PresenceDebug";
 import { ChatNotificationsProvider } from "@/context/ChatNotificationsContext";
+import QueryProvider from "@/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "Task Management System",
@@ -68,15 +69,17 @@ export default function RootLayout({
         className={`${getFontVariables()} antialiased`}
       >
         <ThemeProvider>
-          <AuthProvider>
-            <ChatNotificationsProvider>
-              <SimplePresence>
-                <ProtectedRoute>
-                  {children}
-                </ProtectedRoute>
-              </SimplePresence>
-            </ChatNotificationsProvider>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <ChatNotificationsProvider>
+                <SimplePresence>
+                  <ProtectedRoute>
+                    {children}
+                  </ProtectedRoute>
+                </SimplePresence>
+              </ChatNotificationsProvider>
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
         <Toaster />
       </body>

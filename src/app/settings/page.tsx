@@ -9,8 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Moon, Sun, Bell, Lock, Trash2 } from "lucide-react";
+import { Trash2, AlertTriangle, Cloud, Lock, Moon, Sun, Monitor, Bell, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface SettingsData {
   theme: "light" | "dark" | "system";
@@ -32,6 +34,7 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
   const [settings, setSettings] = useState<SettingsData>({
     theme: "system",
     notifications: {
@@ -65,7 +68,7 @@ export default function SettingsPage() {
     const newSettings = { ...settings, theme: newTheme };
     setSettings(newSettings);
     localStorage.setItem('userSettings', JSON.stringify(newSettings));
-    
+
     // Use theme context to apply theme globally
     setTheme(newTheme);
     toast.success("Theme updated successfully!");
@@ -99,16 +102,14 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      setLoading(true);
-      try {
-        // In a real app, you would call an API to delete the account
-        toast.error("Account deletion is not implemented in this demo");
-      } catch (error) {
-        toast.error("Error deleting account");
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      // In a real app, you would call an API to delete the account
+      toast.error("Account deletion is not implemented in this demo");
+    } catch (error) {
+      toast.error("Error deleting account");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -327,9 +328,9 @@ export default function SettingsPage() {
                   Permanently delete your account and all data
                 </div>
               </div>
-              <Button 
-                variant="destructive" 
-                onClick={handleDeleteAccount}
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteAccountConfirm(true)}
                 disabled={loading}
                 className="w-full sm:w-auto"
               >
@@ -338,7 +339,18 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
       </div>
-    </div>
+      <ConfirmDialog
+        open={showDeleteAccountConfirm}
+        onOpenChange={setShowDeleteAccountConfirm}
+        title="Delete Account"
+        description="Are you sure you want to permanently delete your account? All your data will be lost. This action cannot be undone."
+        confirmLabel="Delete Forever"
+        variant="danger"
+        onConfirm={handleDeleteAccount}
+        loading={loading}
+      />
+    </div >
   );
 }

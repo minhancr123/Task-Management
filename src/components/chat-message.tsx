@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import type { ChatMessage } from '@/hooks/use-realtime-chat'
+import { Check, CheckCheck, Loader2 } from 'lucide-react'
 
 interface ChatMessageItemProps {
   message: ChatMessage
@@ -33,11 +34,19 @@ export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessa
         )}
         <div
           className={cn(
-            'py-2 px-3 rounded-xl text-sm w-fit',
+            'py-2 px-3 rounded-xl text-sm w-fit relative group',
             isOwnMessage ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
           )}
         >
           {message.content}
+
+          {isOwnMessage && (
+            <span className="ml-2 inline-flex items-center opacity-70" title={message.status}>
+              {message.status === 'sending' && <Loader2 className="w-3 h-3 animate-spin" />}
+              {message.status === 'sent' && <Check className="w-3 h-3" />}
+              {message.status === 'seen' && <CheckCheck className="w-3 h-3" />}
+            </span>
+          )}
         </div>
       </div>
     </div>

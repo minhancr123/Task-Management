@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const taskSchemaValidate = z.object({
-    id  : z.string().optional(),
+    id: z.string().optional(),
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required").optional().nullable(),
     due_date: z.string().refine((date) => {
@@ -10,8 +10,8 @@ export const taskSchemaValidate = z.object({
         return dueDate >= today;
     }, "Due date must be today or in the future"),
     category: z.string().min(1, "Category is required"),
-    priority : z.enum(["low", "medium", "high"]),
-    status: z.enum(["todo", "in-progress", "completed"])
+    priority: z.enum(["low", "medium", "high"]),
+    status: z.enum(["todo", "in-progress", "in_progress", "completed", "in_review", "cancelled"])
 })
 
 export type TaskFormData = z.infer<typeof taskSchemaValidate>;

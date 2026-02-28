@@ -7,7 +7,15 @@ import { LoginForm } from "./login-form";
 import SignupForm from "./signup-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Users, Zap, Shield, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  Users,
+  Zap,
+  Shield,
+  Sparkles,
+  BarChart3,
+  ArrowRight,
+} from "lucide-react";
 
 export default function AuthPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -22,142 +30,220 @@ export default function AuthPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-2 border-indigo-500/30 animate-ping" />
+            <div className="absolute inset-1 rounded-full border-2 border-t-indigo-400 animate-spin" />
+          </div>
+          <p className="text-sm text-slate-400 animate-pulse">
+            Đang tải...
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (user) {
-    return null; // Will redirect
-  }
+  if (user) return null;
 
   const features = [
     {
-      icon: <CheckCircle className="h-6 w-6 text-green-600" />,
-      title: "Task Management",
-      description: "Organize and track your tasks efficiently"
+      icon: <CheckCircle2 className="h-5 w-5" />,
+      title: "Quản lý công việc",
+      description: "Kanban board, drag & drop, phân công thông minh",
+      color: "from-emerald-500 to-teal-600",
+      iconBg: "bg-emerald-500/10 text-emerald-400",
     },
     {
-      icon: <Users className="h-6 w-6 text-blue-600" />,
-      title: "Team Collaboration",
-      description: "Work together with your team members"
+      icon: <Users className="h-5 w-5" />,
+      title: "Cộng tác nhóm",
+      description: "Chat realtime, phòng ban, phân quyền RBAC",
+      color: "from-blue-500 to-cyan-600",
+      iconBg: "bg-blue-500/10 text-blue-400",
     },
     {
-      icon: <Zap className="h-6 w-6 text-yellow-600" />,
-      title: "Real-time Updates",
-      description: "Get instant notifications and updates"
+      icon: <BarChart3 className="h-5 w-5" />,
+      title: "Báo cáo & KPI",
+      description: "Dashboard thống kê, đánh giá hiệu suất",
+      color: "from-violet-500 to-purple-600",
+      iconBg: "bg-violet-500/10 text-violet-400",
     },
     {
-      icon: <Shield className="h-6 w-6 text-purple-600" />,
-      title: "Secure & Private",
-      description: "Your data is protected and encrypted"
-    }
+      icon: <Shield className="h-5 w-5" />,
+      title: "Bảo mật cao",
+      description: "Supabase RLS, audit logs, mã hóa end-to-end",
+      color: "from-amber-500 to-orange-600",
+      iconBg: "bg-amber-500/10 text-amber-400",
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-4 sm:py-8">
-        <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 min-h-screen items-center">
-          
-          {/* Left Side - Welcome & Features */}
-          <div className="space-y-4 sm:space-y-8 lg:pr-8 order-2 lg:order-1">
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
-                <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                Welcome to TaskFlow
-              </div>
-              
-              <h1 className="text-2xl sm:text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
-                Manage Your
-                <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Tasks Efficiently
+    <div className="min-h-screen relative overflow-hidden bg-[#07070f]">
+      {/* Animated background */}
+      <div className="absolute inset-0">
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(99,102,241,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.3) 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }}
+        />
+
+        {/* Animated gradient orbs */}
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-600/15 blur-[120px] animate-float" />
+        <div
+          className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/15 blur-[120px]"
+          style={{ animation: "float 5s ease-in-out infinite reverse" }}
+        />
+        <div
+          className="absolute top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-cyan-600/10 blur-[100px]"
+          style={{ animation: "float 6s ease-in-out infinite 1s" }}
+        />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 min-h-[calc(100vh-4rem)] items-center">
+          {/* Left Side – Hero */}
+          <div className="space-y-8 order-2 lg:order-1 animate-fade-in-up">
+            {/* Badge */}
+            <div className="inline-flex items-center px-4 py-2 rounded-full border border-indigo-500/20 bg-indigo-500/5 backdrop-blur-sm">
+              <Sparkles className="h-4 w-4 text-indigo-400 mr-2" />
+              <span className="text-sm font-medium text-indigo-300">
+                Enterprise Task Management
+              </span>
+            </div>
+
+            {/* Headline */}
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+                <span className="text-white">Nâng tầm</span>
+                <br />
+                <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  hiệu suất làm việc
                 </span>
               </h1>
-              
-              <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-2xl">
-                Streamline your workflow, boost productivity, and achieve your goals with our modern task management platform.
+              <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-xl">
+                Hệ thống quản lý công việc thông minh với phân quyền RBAC, chat
+                realtime, Kanban board và đánh giá KPI toàn diện.
               </p>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 sm:p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/50">
-                    <div className="flex-shrink-0 mt-1">
-                      {feature.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm">
-                        {feature.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
-                        {feature.description}
-                      </p>
-                    </div>
+            {/* Feature cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 stagger-children">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="group flex items-start gap-3 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-300"
+                >
+                  <div
+                    className={`flex-shrink-0 w-10 h-10 rounded-xl ${feature.iconBg} flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}
+                  >
+                    {feature.icon}
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <h3 className="font-semibold text-white text-sm">
+                      {feature.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-8 pt-2">
+              {[
+                { value: "6", label: "Cấp phân quyền" },
+                { value: "15+", label: "Modules" },
+                { value: "99.9%", label: "Uptime" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <p className="text-2xl font-bold text-white">{stat.value}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right Side - Auth Forms */}
-          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
-            <Card className="w-full max-w-md bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/20 dark:border-slate-700/50 shadow-2xl">
-              <CardContent className="p-6 sm:p-8">
-                {/* Mode Toggle */}
-                <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1 mb-8">
-                  <Button
-                    variant={isLoginMode ? "default" : "ghost"}
-                    className={`flex-1 ${isLoginMode 
-                      ? "bg-white dark:bg-slate-600 shadow-sm" 
-                      : "text-gray-600 dark:text-gray-400"
-                    }`}
-                    onClick={() => setIsLoginMode(true)}
-                  >
-                    Sign In
-                  </Button>
-                  <Button
-                    variant={!isLoginMode ? "default" : "ghost"}
-                    className={`flex-1 ${!isLoginMode 
-                      ? "bg-white dark:bg-slate-600 shadow-sm" 
-                      : "text-gray-600 dark:text-gray-400"
-                    }`}
-                    onClick={() => setIsLoginMode(false)}
-                  >
-                    Sign Up
-                  </Button>
-                </div>
+          {/* Right Side – Auth Card */}
+          <div
+            className="flex justify-center lg:justify-end order-1 lg:order-2 animate-fade-in-up"
+            style={{ animationDelay: "0.15s" }}
+          >
+            <div className="w-full max-w-[440px]">
+              <div className="relative">
+                {/* Glow behind card */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-60" />
 
-                {/* Welcome Text */}
-                <div className="text-center mb-6 sm:mb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {isLoginMode ? "Welcome Back!" : "Create Account"}
-                  </h2>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                    {isLoginMode 
-                      ? "Sign in to continue to TaskFlow" 
-                      : "Join TaskFlow and boost your productivity"
-                    }
-                  </p>
-                </div>
+                <Card className="relative rounded-3xl border-white/[0.08] bg-[#12121f]/80 backdrop-blur-2xl shadow-2xl shadow-black/40">
+                  <CardContent className="p-7 sm:p-8">
+                    {/* Mode Toggle */}
+                    <div className="flex rounded-2xl bg-white/[0.04] p-1 mb-8 border border-white/[0.06]">
+                      <Button
+                        variant="ghost"
+                        className={`flex-1 rounded-xl h-10 text-sm font-medium transition-all duration-300 ${isLoginMode
+                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20 hover:text-white"
+                            : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+                          }`}
+                        onClick={() => setIsLoginMode(true)}
+                      >
+                        Đăng nhập
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className={`flex-1 rounded-xl h-10 text-sm font-medium transition-all duration-300 ${!isLoginMode
+                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20 hover:text-white"
+                            : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+                          }`}
+                        onClick={() => setIsLoginMode(false)}
+                      >
+                        Đăng ký
+                      </Button>
+                    </div>
 
-                {/* Forms */}
-                {isLoginMode ? (
-                  <LoginForm onToggleMode={() => setIsLoginMode(false)} />
-                ) : (
-                  <SignupForm onToggleMode={() => setIsLoginMode(true)} />
-                )}
+                    {/* Welcome Text */}
+                    <div className="text-center mb-7">
+                      <h2 className="text-2xl font-bold text-white mb-2">
+                        {isLoginMode ? "Chào mừng trở lại!" : "Tạo tài khoản"}
+                      </h2>
+                      <p className="text-sm text-slate-400">
+                        {isLoginMode
+                          ? "Đăng nhập để tiếp tục với TaskPro"
+                          : "Tham gia TaskPro để tăng hiệu suất"}
+                      </p>
+                    </div>
 
-                {/* Footer */}
-                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-slate-700">
-                  <p className="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                    By continuing, you agree to our{" "}
-                    <a href="#" className="text-blue-600 hover:underline">Terms of Service</a>
-                    {" "}and{" "}
-                    <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                    {/* Forms */}
+                    {isLoginMode ? (
+                      <LoginForm
+                        onToggleMode={() => setIsLoginMode(false)}
+                      />
+                    ) : (
+                      <SignupForm
+                        onToggleMode={() => setIsLoginMode(true)}
+                      />
+                    )}
+
+                    {/* Footer */}
+                    <div className="mt-8 pt-6 border-t border-white/[0.06]">
+                      <p className="text-center text-xs text-slate-500">
+                        Bằng việc tiếp tục, bạn đồng ý với{" "}
+                        <a href="#" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                          Điều khoản dịch vụ
+                        </a>{" "}
+                        và{" "}
+                        <a href="#" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                          Chính sách bảo mật
+                        </a>
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>

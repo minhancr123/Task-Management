@@ -1,5 +1,6 @@
 "use client";
-import { Profile, signIn, signOut, signUp, updateProfile } from "@/lib/auth";
+import { signIn, signOut, signUp, updateProfile } from "@/lib/auth";
+import { Profile } from "@/lib/types/database";
 import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { createContext, useEffect, useState, useCallback, useMemo } from "react";
